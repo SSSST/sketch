@@ -95,3 +95,6 @@ Route::apiResource('vote', 'API\VoteController')->only(['index', 'store', 'destr
 
 // 打赏
 Route::apiResource('reward', 'API\RewardController')->only(['index', 'store', 'destroy']);
+
+// 管理部分
+Route::post('manage', 'API\AdminController@manage'); // 管理员执行管理操作
