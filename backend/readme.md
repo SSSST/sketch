@@ -671,7 +671,23 @@ http://127.0.0.1:8000/api/user/keepNotified/{user}
 ##### 4.5.11.5 获取与某段关注关系相关的信息（是否跟踪动态，是否已阅更新）
 http://127.0.0.1:8000/api/user/follow/{user}
 方法：GET
-授权：必须登录，只能为本人账户操作
+授权：必须登录，只能为本人账户操作  
+
+#### 4.5.12 administration相关  
+##### 4.5.12.1 管理员可创建管理记录并作出管理
+http://127.0.0.1:8000/api/manage  
+方法：POST  
+授权：必须登录，且登录用户为管理员  
+必填项：  
+administratable_type(string):'user'|'thread'|'post'|'quote'|'status' 被管理内容类型  
+administratable_id(int) 被管理内容id  
+administration_type(string):'delete'... 管理操作  
+reason(string) 原因  
+administratee_id(int) 被管理用户  
+选填项：  
+report_id(int) 举报人id  
+options(json) 具体执行操作，如禁言天数、匿名马甲...  
+is_public(boolean) 是否公开
 
 ## 5. 如何测试
 #### 5.1 写一个新的专项测试文件
