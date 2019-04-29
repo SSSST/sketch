@@ -45,11 +45,11 @@ class StoreAdministration extends FormRequest
     public function generate()
     {
         $administration_data = $this->only('report_id', 'administratable_type', 'administratable_id', 'administration_type', 'options', 'reason', 'administratee_id', 'is_public');
+        if(is_null(Request('is_public'))) $administration_data['is_public'] = true;
         $administration_data['administrator_id'] = auth('api')->id();
 
         $administration = DB::transaction(function() use($administration_data) {
             $administration = Administration::create($administration_data);
-
             $item = $this->findItem(Request('administratable_id'), Request('administratable_type'));
             switch ($administration_data['administratable_type']) {
                 case 'user':
@@ -62,10 +62,10 @@ class StoreAdministration extends FormRequest
                     $this->postManagement($item);
                     break;
                 case 'status':
-                    $this->statusManagement($item);
+                    $item->delete();
                     break;
                 case 'quote':
-                    $this->quoteManagement($item);
+
                     break;
             }
             return $administration;
@@ -74,7 +74,12 @@ class StoreAdministration extends FormRequest
         return $administration;
     }
 
-    private function threadManagement($thread)
+    private function userManagement($user) //禁言、解禁、禁止登录、解禁登录
+    {
+
+    }
+
+    private function threadManagement($thread) // 删除、修改channel、匿名、非匿名、锁帖、解锁、边缘、非边缘
     {
         switch (Request('administration_type')) {
             // case 'lock':
@@ -98,7 +103,7 @@ class StoreAdministration extends FormRequest
         }
     }
 
-    private function postManagement($post)
+    private function postManagement($post) // 删除、匿名、非匿名、折叠、非折叠、边缘、非边缘
     {
         switch (Request('administration_type')) {
             // case 'fold':
@@ -106,24 +111,10 @@ class StoreAdministration extends FormRequest
             //     $post->is_folded = !$post->is_folded;
             //     $post->save();
             //     break;
-            // case 'anonymous':
-            //
-            //     break;
             case 'delete':
                 $post->delete();
                 break;
         }
-    }
-
-    private function statusManagement($status)
-    {
-        $status->delete();
-        dd($status);
-    }
-
-    private function quoteManagement($quote)
-    {
-
     }
 
     private function findItem($item_id, $item_type)

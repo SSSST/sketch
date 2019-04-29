@@ -23,7 +23,6 @@ class AdministrationResource extends JsonResource
                 'administratable_type' => (string)$this->administratable_type,
                 'administratable_id' => (int)$this->administratable_id,
                 'administration_type' => (string)$this->administration_type,
-                //'options' => (string)$this->options,
                 'reason' => (string)$this->reason,
                 'administratee_id' => (int)$this->administratee_id,
                 'is_public' => (bool)$this->is_public,

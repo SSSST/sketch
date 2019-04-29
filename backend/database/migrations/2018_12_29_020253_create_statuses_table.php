@@ -26,6 +26,7 @@ class CreateStatusesTable extends Migration
             $table->unsignedInteger('forward_count')->default(0);//转发数
             $table->unsignedInteger('upvote_count')->default(0);//赞数
             $table->dateTime('created_at')->nullable();//创建时间
+            $table->softDeletes();
             //是否允许回帖
             //多少回帖，多少转发
         });
