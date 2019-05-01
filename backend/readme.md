@@ -683,7 +683,6 @@ administratable_type(string):'user'|'thread'|'post'|'quote'|'status' 被管理�
 administratable_id(int) 被管理内容id  
 administration_type(string):'delete'... 管理操作  
 reason(string) 原因  
-administratee_id(int) 被管理用户  
 选填项：  
 report_id(int) 举报人id  
 options(json) 具体执行操作，如禁言天数、匿名马甲...  

@@ -37,20 +37,21 @@ class StoreAdministration extends FormRequest
             'administration_type' => 'required|string',
             'options' => 'json',
             'reason' => 'required|string',
-            'administratee_id' => 'required|numeric',
             'is_public' => 'boolean',
         ];
     }
 
     public function generate()
     {
-        $administration_data = $this->only('report_id', 'administratable_type', 'administratable_id', 'administration_type', 'options', 'reason', 'administratee_id', 'is_public');
+        $item = $this->findItem(Request('administratable_id'), Request('administratable_type'));
+        $administration_data = $this->only('report_id', 'administratable_type', 'administratable_id', 'administration_type', 'options', 'reason', 'is_public');
         if(is_null(Request('is_public'))) $administration_data['is_public'] = true;
         $administration_data['administrator_id'] = auth('api')->id();
+        $administration_data['administratee_id'] = $item->user_id;
 
-        $administration = DB::transaction(function() use($administration_data) {
+        $administration = DB::transaction(function() use($administration_data, $item) {
             $administration = Administration::create($administration_data);
-            $item = $this->findItem(Request('administratable_id'), Request('administratable_type'));
+
             switch ($administration_data['administratable_type']) {
                 case 'user':
                     $this->userManagement($item);

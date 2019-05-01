@@ -22,4 +22,9 @@ class Quote extends Model
     {
         return $this->belongsTo(User::class, 'reviewer_id')->select('id','name', 'title_id');
     }
+
+    public function administrations()
+    {
+        return $this->morphMany('App\Models\Administration', 'administratable');
+    }
 }

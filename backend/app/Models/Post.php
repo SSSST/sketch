@@ -65,6 +65,11 @@ class Post extends Model
         return $this->belongsToMany('App\Models\Tag', 'tag_post', 'post_id', 'tag_id');
     }
 
+    public function administrations()
+    {
+        return $this->morphMany('App\Models\Administration', 'administratable');
+    }
+
     public function scopeExclude($query, $value = array())
     {
         return $query->select( array_diff( $this->post_columns,(array) $value));

@@ -17,8 +17,7 @@ class CreateAdministrationsTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('administrator_id')->index(); //执行管理员
             $table->unsignedInteger('report_id')->default(0); // 对应的举报ID
-            $table->string('administratable_type'); // 被管理内容的类型
-            $table->unsignedInteger('administratable_id'); // 被管理内容的ID
+            $table->morphs('administratable'); // user|thread|post|status|quote
             $table->string('administration_type'); // 管理操作
             $table->json('options')->nullable(); // 若为禁言则注明禁言多少天
             $table->string('reason'); // 具体理由

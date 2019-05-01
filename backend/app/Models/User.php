@@ -89,6 +89,11 @@ class User extends Authenticatable
         return $this->belongsToMany('App\Models\Thread', 'collection_count', 'user_id', 'thread_id');
     }
 
+    public function administrations()
+    {
+        return $this->morphMany('App\Models\Administration', 'administratable');
+    }
+
 
     /**
     * 查看对应用户的roles里面是否含有某种对应的global permission

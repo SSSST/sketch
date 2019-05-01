@@ -22,7 +22,7 @@ class AdministrationTest extends TestCase
         $reason = 'delete an item';
 
         $status = factory('App\Models\Status')->create(['user_id' => $user->id]);
-        $response_status = $this->post('/api/manage', ['administratable_type' => 'status', 'administratable_id' => $status->id, 'administration_type' => 'delete', 'reason' => $reason, 'administratee_id' => $status->user_id])
+        $response_status = $this->post('/api/manage', ['administratable_type' => 'status', 'administratable_id' => $status->id, 'administration_type' => 'delete', 'reason' => $reason])
         ->assertStatus(200)
         ->assertJsonStructure([
             'code',
@@ -63,7 +63,7 @@ class AdministrationTest extends TestCase
         $this->assertSoftDeleted('statuses', ['id' => $status->id]);
 
         $post = factory('App\Models\Post')->create(['user_id' => $user->id]);
-        $response_post = $this->post('/api/manage', ['administratable_type' => 'post', 'administratable_id' => $post->id, 'administration_type' => 'delete', 'reason' => $reason, 'administratee_id' => $post->user_id])
+        $response_post = $this->post('/api/manage', ['administratable_type' => 'post', 'administratable_id' => $post->id, 'administration_type' => 'delete', 'reason' => $reason])
         ->assertStatus(200)
         ->assertJsonStructure([
             'code',
@@ -104,7 +104,7 @@ class AdministrationTest extends TestCase
         $this->assertSoftDeleted('posts', ['id' => $post->id]);
 
         $thread = factory('App\Models\Thread')->create(['user_id' => $user->id]);
-        $response_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'delete', 'reason' => $reason, 'administratee_id' => $thread->user_id])
+        $response_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'delete', 'reason' => $reason])
         ->assertStatus(200)
         ->assertJsonStructure([
             'code',
@@ -158,21 +158,21 @@ class AdministrationTest extends TestCase
         $reason = 'delete an item';
 
         $status = factory('App\Models\Status')->create(['user_id' => $user->id]);
-        $response_status = $this->post('/api/manage', ['administratable_type' => 'status', 'administratable_id' => $status->id, 'administration_type' => 'delete', 'reason' => $reason, 'administratee_id' => $status->user_id])
+        $response_status = $this->post('/api/manage', ['administratable_type' => 'status', 'administratable_id' => $status->id, 'administration_type' => 'delete', 'reason' => $reason])
         ->assertStatus(200);
-        $failed_response_status = $this->post('/api/manage', ['administratable_type' => 'status', 'administratable_id' => $status->id, 'administration_type' => 'delete', 'reason' => $reason, 'administratee_id' => $status->user_id])
+        $failed_response_status = $this->post('/api/manage', ['administratable_type' => 'status', 'administratable_id' => $status->id, 'administration_type' => 'delete', 'reason' => $reason])
         ->assertStatus(404);
 
         $post = factory('App\Models\Post')->create(['user_id' => $user->id]);
-        $response_post = $this->post('/api/manage', ['administratable_type' => 'post', 'administratable_id' => $post->id, 'administration_type' => 'delete', 'reason' => $reason, 'administratee_id' => $post->user_id])
+        $response_post = $this->post('/api/manage', ['administratable_type' => 'post', 'administratable_id' => $post->id, 'administration_type' => 'delete', 'reason' => $reason])
         ->assertStatus(200);
-        $failed_response_post = $this->post('/api/manage', ['administratable_type' => 'post', 'administratable_id' => $post->id, 'administration_type' => 'delete', 'reason' => $reason, 'administratee_id' => $post->user_id])
+        $failed_response_post = $this->post('/api/manage', ['administratable_type' => 'post', 'administratable_id' => $post->id, 'administration_type' => 'delete', 'reason' => $reason])
         ->assertStatus(404);
 
         $thread = factory('App\Models\Thread')->create(['user_id' => $user->id]);
-        $response_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'delete', 'reason' => $reason, 'administratee_id' => $thread->user_id])
+        $response_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'delete', 'reason' => $reason])
         ->assertStatus(200);
-        $failed_response_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'delete', 'reason' => $reason, 'administratee_id' => $thread->user_id])
+        $failed_response_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'delete', 'reason' => $reason])
         ->assertStatus(404);
     }
 
@@ -185,15 +185,15 @@ class AdministrationTest extends TestCase
         $reason = 'delete an item';
 
         $status = factory('App\Models\Status')->create(['user_id' => $user->id]);
-        $response_status = $this->post('/api/manage', ['administratable_type' => 'status', 'administratable_id' => $status->id, 'administration_type' => 'delete', 'reason' => $reason, 'administratee_id' => $status->user_id])
+        $response_status = $this->post('/api/manage', ['administratable_type' => 'status', 'administratable_id' => $status->id, 'administration_type' => 'delete', 'reason' => $reason])
         ->assertStatus(403);
 
         $post = factory('App\Models\Post')->create(['user_id' => $user->id]);
-        $response_post = $this->post('/api/manage', ['administratable_type' => 'post', 'administratable_id' => $post->id, 'administration_type' => 'delete', 'reason' => $reason, 'administratee_id' => $post->user_id])
+        $response_post = $this->post('/api/manage', ['administratable_type' => 'post', 'administratable_id' => $post->id, 'administration_type' => 'delete', 'reason' => $reason])
         ->assertStatus(403);
 
         $thread = factory('App\Models\Thread')->create(['user_id' => $user->id]);
-        $response_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'delete', 'reason' => $reason, 'administratee_id' => $thread->user_id])
+        $response_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'delete', 'reason' => $reason])
         ->assertStatus(403);
     }
 
@@ -204,15 +204,15 @@ class AdministrationTest extends TestCase
         $reason = 'delete an item';
 
         $status = factory('App\Models\Status')->create(['user_id' => $user->id]);
-        $response_status = $this->post('/api/manage', ['administratable_type' => 'status', 'administratable_id' => $status->id, 'administration_type' => 'delete', 'reason' => $reason, 'administratee_id' => $status->user_id])
+        $response_status = $this->post('/api/manage', ['administratable_type' => 'status', 'administratable_id' => $status->id, 'administration_type' => 'delete', 'reason' => $reason])
         ->assertStatus(401);
 
         $post = factory('App\Models\Post')->create(['user_id' => $user->id]);
-        $response_post = $this->post('/api/manage', ['administratable_type' => 'post', 'administratable_id' => $post->id, 'administration_type' => 'delete', 'reason' => $reason, 'administratee_id' => $post->user_id])
+        $response_post = $this->post('/api/manage', ['administratable_type' => 'post', 'administratable_id' => $post->id, 'administration_type' => 'delete', 'reason' => $reason])
         ->assertStatus(401);
 
         $thread = factory('App\Models\Thread')->create(['user_id' => $user->id]);
-        $response_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'delete', 'reason' => $reason, 'administratee_id' => $thread->user_id])
+        $response_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'delete', 'reason' => $reason])
         ->assertStatus(401);
     }
 }

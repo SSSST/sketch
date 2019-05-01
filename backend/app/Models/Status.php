@@ -30,4 +30,8 @@ class Status extends Model
         return $this->morphTo();
     }
 
+    public function administrations()
+    {
+        return $this->morphMany('App\Models\Administration', 'administratable');
+    }
 }

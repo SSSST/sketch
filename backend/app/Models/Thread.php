@@ -70,6 +70,11 @@ class Thread extends Model
         return $this->belongsToMany('App\Models\User', 'collections', 'thread_id', 'user_id')->select(['id','name']);
     }
 
+    public function administrations()
+    {
+        return $this->morphMany('App\Models\Administration', 'administratable');
+    }
+
 
     //以下是scopes
 
