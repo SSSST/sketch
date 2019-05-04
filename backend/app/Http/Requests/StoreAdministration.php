@@ -83,21 +83,24 @@ class StoreAdministration extends FormRequest
     private function threadManagement($thread) // 删除、修改channel、匿名、非匿名、锁帖、解锁、边缘、非边缘
     {
         switch (Request('administration_type')) {
-            // case 'lock':
-            // case 'unlock':
-            //     $thread->is_locked = !$thread->is_locked;
-            //     $thread->save();
-            //     break;
-            // case 'public':
-            // case 'no_public':
-            //     $thread->is_public = !$thread->is_public;
-            //     $thread->save();
-            //     break;
-            // case 'bianyuan':
-            // case 'no_bianyuan':
-            //     $thread->is_bianyuan = !$thread->bianyuan;
-            //     $thread->save();
-            //     break;
+            case 'lock':
+                $this->changeIsLocked($thread, 0); // 若要执行操作则帖子的is_locked应为0
+                break;
+            case 'unlock':
+                $this->changeIsLocked($thread, 1);
+                break;
+            case 'public':
+                $this->changeIsPublic($thread, 0);
+                break;
+            case 'no_public':
+                $this->changeIsPublic($thread, 1);
+                break;
+            case 'bianyuan':
+                $this->changeIsBianyuan($thread, 0);
+                break;
+            case 'no_bianyuan':
+                $this->changeIsBianyuan($thread, 1);
+                break;
             case 'delete':
                 $thread->delete();
                 break;
@@ -107,11 +110,18 @@ class StoreAdministration extends FormRequest
     private function postManagement($post) // 删除、匿名、非匿名、折叠、非折叠、边缘、非边缘
     {
         switch (Request('administration_type')) {
-            // case 'fold':
-            // case 'unfold':
-            //     $post->is_folded = !$post->is_folded;
-            //     $post->save();
-            //     break;
+            case 'bianyuan':
+                $this->changeIsBianyuan($post, 0);
+                break;
+            case 'no_bianyuan':
+                $this->changeIsBianyuan($post, 1);
+                break;
+            case 'fold':
+                $this->changeIsFolded($post, 0);
+                break;
+            case 'unfold':
+                $this->changeIsFolded($post, 1);
+                break;
             case 'delete':
                 $post->delete();
                 break;
@@ -140,5 +150,33 @@ class StoreAdministration extends FormRequest
 
         if(!$item) abort(404);
         return $item;
+    }
+
+    private function changeIsLocked($thread, $is_locked)
+    {
+        if($thread->is_locked != $is_locked) {abort(409);}
+        $thread->is_locked = !$thread->is_locked;
+        $thread->save();
+    }
+
+    private function changeIsPublic($thread, $is_public)
+    {
+        if($thread->is_public != $is_public) {abort(409);}
+        $thread->is_public = !$thread->is_public;
+        $thread->save();
+    }
+
+    private function changeIsBianyuan($item, $is_bianyuan)
+    {
+        if($item->is_bianyuan != $is_bianyuan) {abort(409);}
+        $item->is_bianyuan = !$item->is_bianyuan;
+        $item->save();
+    }
+
+    private function changeIsFolded($post, $is_folded)
+    {
+        if($post->is_folded != $is_folded) {abort(409);}
+        $post->is_folded = !$post->is_folded;
+        $post->save();
     }
 }

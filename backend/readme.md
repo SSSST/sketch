@@ -681,7 +681,7 @@ http://127.0.0.1:8000/api/manage
 必填项：  
 administratable_type(string):'user'|'thread'|'post'|'quote'|'status' 被管理内容类型  
 administratable_id(int) 被管理内容id  
-administration_type(string):'delete'... 管理操作  
+administration_type(string):'delete'|'lock'|'unlock'|'public'|'no_public'|'bianyuan'|'no_bianyuan'|'fold'|'unfold'... 管理操作  
 reason(string) 原因  
 选填项：  
 report_id(int) 举报人id  
