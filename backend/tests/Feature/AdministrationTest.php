@@ -37,6 +37,7 @@ class AdministrationTest extends TestCase
                         'administratable_id',
                         'administration_type',
                         'reason',
+                        'options',
                         'administratee_id',
                         'is_public',
                         'created_at',
@@ -55,6 +56,7 @@ class AdministrationTest extends TestCase
                         'administratable_id' => $status->id,
                         'administration_type' => 'delete',
                         'reason' => $reason,
+                        'options' => NULL,
                         'administratee_id' => $status->user_id,
                     ],
                 ],
@@ -78,6 +80,7 @@ class AdministrationTest extends TestCase
                         'administratable_id',
                         'administration_type',
                         'reason',
+                        'options',
                         'administratee_id',
                         'is_public',
                         'created_at',
@@ -96,6 +99,7 @@ class AdministrationTest extends TestCase
                         'administratable_id' => $post->id,
                         'administration_type' => 'delete',
                         'reason' => $reason,
+                        'options' => NULL,
                         'administratee_id' => $post->user_id,
                     ],
                 ],
@@ -119,6 +123,7 @@ class AdministrationTest extends TestCase
                         'administratable_id',
                         'administration_type',
                         'reason',
+                        'options',
                         'administratee_id',
                         'is_public',
                         'created_at',
@@ -137,6 +142,7 @@ class AdministrationTest extends TestCase
                         'administratable_id' => $thread->id,
                         'administration_type' => 'delete',
                         'reason' => $reason,
+                        'options' => NULL,
                         'administratee_id' => $thread->user_id,
                     ],
                 ],
@@ -173,6 +179,7 @@ class AdministrationTest extends TestCase
                         'administratable_id',
                         'administration_type',
                         'reason',
+                        'options',
                         'administratee_id',
                         'is_public',
                         'created_at',
@@ -191,6 +198,7 @@ class AdministrationTest extends TestCase
                         'administratable_id' => $thread->id,
                         'administration_type' => 'lock',
                         'reason' => $reason,
+                        'options' => NULL,
                         'administratee_id' => $thread->user_id,
                     ],
                 ],
@@ -213,6 +221,7 @@ class AdministrationTest extends TestCase
                         'administratable_id',
                         'administration_type',
                         'reason',
+                        'options',
                         'administratee_id',
                         'is_public',
                         'created_at',
@@ -231,6 +240,7 @@ class AdministrationTest extends TestCase
                         'administratable_id' => $thread->id,
                         'administration_type' => 'unlock',
                         'reason' => $reason,
+                        'options' => NULL,
                         'administratee_id' => $thread->user_id,
                     ],
                 ],
@@ -267,6 +277,7 @@ class AdministrationTest extends TestCase
                         'administratable_id',
                         'administration_type',
                         'reason',
+                        'options',
                         'administratee_id',
                         'is_public',
                         'created_at',
@@ -285,6 +296,7 @@ class AdministrationTest extends TestCase
                         'administratable_id' => $thread->id,
                         'administration_type' => 'no_public',
                         'reason' => $reason,
+                        'options' => NULL,
                         'administratee_id' => $thread->user_id,
                     ],
                 ],
@@ -307,6 +319,7 @@ class AdministrationTest extends TestCase
                         'administratable_id',
                         'administration_type',
                         'reason',
+                        'options',
                         'administratee_id',
                         'is_public',
                         'created_at',
@@ -325,6 +338,7 @@ class AdministrationTest extends TestCase
                         'administratable_id' => $thread->id,
                         'administration_type' => 'public',
                         'reason' => $reason,
+                        'options' => NULL,
                         'administratee_id' => $thread->user_id,
                     ],
                 ],
@@ -361,6 +375,7 @@ class AdministrationTest extends TestCase
                         'administratable_id',
                         'administration_type',
                         'reason',
+                        'options',
                         'administratee_id',
                         'is_public',
                         'created_at',
@@ -379,6 +394,7 @@ class AdministrationTest extends TestCase
                         'administratable_id' => $thread->id,
                         'administration_type' => 'bianyuan',
                         'reason' => $reason,
+                        'options' => NULL,
                         'administratee_id' => $thread->user_id,
                     ],
                 ],
@@ -401,6 +417,7 @@ class AdministrationTest extends TestCase
                         'administratable_id',
                         'administration_type',
                         'reason',
+                        'options',
                         'administratee_id',
                         'is_public',
                         'created_at',
@@ -419,6 +436,7 @@ class AdministrationTest extends TestCase
                         'administratable_id' => $thread->id,
                         'administration_type' => 'no_bianyuan',
                         'reason' => $reason,
+                        'options' => NULL,
                         'administratee_id' => $thread->user_id,
                     ],
                 ],
@@ -442,6 +460,7 @@ class AdministrationTest extends TestCase
                         'administratable_id',
                         'administration_type',
                         'reason',
+                        'options',
                         'administratee_id',
                         'is_public',
                         'created_at',
@@ -460,6 +479,7 @@ class AdministrationTest extends TestCase
                         'administratable_id' => $post->id,
                         'administration_type' => 'bianyuan',
                         'reason' => $reason,
+                        'options' => NULL,
                         'administratee_id' => $post->user_id,
                     ],
                 ],
@@ -482,6 +502,7 @@ class AdministrationTest extends TestCase
                         'administratable_id',
                         'administration_type',
                         'reason',
+                        'options',
                         'administratee_id',
                         'is_public',
                         'created_at',
@@ -500,12 +521,117 @@ class AdministrationTest extends TestCase
                         'administratable_id' => $post->id,
                         'administration_type' => 'no_bianyuan',
                         'reason' => $reason,
+                        'options' => NULL,
                         'administratee_id' => $post->user_id,
                     ],
                 ],
             ],
         ]);
         $this->assertEquals(0, $post->fresh()->is_bianyuan);
+    }
+
+    /** @test */
+    public function admin_can_change_is_is_anonymous() // 管理员可以将帖子转为匿名/解除匿名
+    {
+        $admin = factory('App\Models\User')->create();
+        DB::table('role_user')->insert([
+            'user_id' => $admin->id,
+            'role' => 'admin',
+        ]);
+        $this->actingAs($admin, 'api');
+        $user = factory('App\Models\User')->create();
+        $reason = 'change is_anonymous';
+        $majia = 'anonymous';
+        $options_data = ['majia' => $majia];
+        $options = json_encode($options_data);
+
+        $thread = factory('App\Models\Thread')->create(['user_id' => $user->id]);
+        $response_anonymous = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'anonymous', 'reason' => $reason, 'options' => $options])
+        ->assertStatus(200)
+        ->assertJsonStructure([
+            'code',
+            'data' => [
+                'administration' => [
+                    'type',
+                    'id',
+                    'attributes' => [
+                        'administrator_id',
+                        'report_id',
+                        'administratable_type',
+                        'administratable_id',
+                        'administration_type',
+                        'reason',
+                        'options',
+                        'administratee_id',
+                        'is_public',
+                        'created_at',
+                    ],
+                ],
+            ],
+        ])
+        ->assertJson([
+            'code' => 200,
+            'data' => [
+                'administration' => [
+                    'type' => 'administration',
+                    'attributes' => [
+                        'administrator_id' => $admin->id,
+                        'administratable_type' => 'thread',
+                        'administratable_id' => $thread->id,
+                        'administration_type' => 'anonymous',
+                        'reason' => $reason,
+                        'options' => [
+                            'majia' => $majia,
+                        ],
+                        'administratee_id' => $thread->user_id,
+                    ],
+                ],
+            ],
+        ]);
+        $this->assertEquals(1, $thread->fresh()->is_anonymous);
+        $this->assertEquals($majia, $thread->fresh()->majia);
+
+        $response_no_anonymous = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'no_anonymous', 'reason' => $reason])
+        ->assertStatus(200)
+        ->assertJsonStructure([
+            'code',
+            'data' => [
+                'administration' => [
+                    'type',
+                    'id',
+                    'attributes' => [
+                        'administrator_id',
+                        'report_id',
+                        'administratable_type',
+                        'administratable_id',
+                        'administration_type',
+                        'reason',
+                        'options',
+                        'administratee_id',
+                        'is_public',
+                        'created_at',
+                    ],
+                ],
+            ],
+        ])
+        ->assertJson([
+            'code' => 200,
+            'data' => [
+                'administration' => [
+                    'type' => 'administration',
+                    'attributes' => [
+                        'administrator_id' => $admin->id,
+                        'administratable_type' => 'thread',
+                        'administratable_id' => $thread->id,
+                        'administration_type' => 'no_anonymous',
+                        'reason' => $reason,
+                        'options' => NULL,
+                        'administratee_id' => $thread->user_id,
+                    ],
+                ],
+            ],
+        ]);
+        $this->assertEquals(0, $thread->fresh()->is_anonymous);
     }
 
     /** @test */
@@ -536,6 +662,7 @@ class AdministrationTest extends TestCase
                         'administratable_id',
                         'administration_type',
                         'reason',
+                        'options',
                         'administratee_id',
                         'is_public',
                         'created_at',
@@ -554,6 +681,7 @@ class AdministrationTest extends TestCase
                         'administratable_id' => $post->id,
                         'administration_type' => 'fold',
                         'reason' => $reason,
+                        'options' => NULL,
                         'administratee_id' => $post->user_id,
                     ],
                 ],
@@ -576,6 +704,7 @@ class AdministrationTest extends TestCase
                         'administratable_id',
                         'administration_type',
                         'reason',
+                        'options',
                         'administratee_id',
                         'is_public',
                         'created_at',
@@ -594,6 +723,7 @@ class AdministrationTest extends TestCase
                         'administratable_id' => $post->id,
                         'administration_type' => 'unfold',
                         'reason' => $reason,
+                        'options' => NULL,
                         'administratee_id' => $post->user_id,
                     ],
                 ],
@@ -636,6 +766,17 @@ class AdministrationTest extends TestCase
 
         $no_bianyuan_thread = factory('App\Models\Thread')->create(['user_id' => $user->id]);
         $response_no_bianyaun_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $no_bianyuan_thread->id, 'administration_type' => 'no_bianyuan', 'reason' => $reason])
+        ->assertStatus(409);
+
+        $majia = 'anonymous';
+        $options_data = ['majia' => $majia];
+        $options = json_encode($options_data);
+        $anonymous_thread = factory('App\Models\Thread')->create(['user_id' => $user->id, 'is_anonymous' => 1]);
+        $response_anonymous_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $anonymous_thread->id, 'administration_type' => 'anonymous', 'reason' => $reason, 'options' => $options])
+        ->assertStatus(409);
+
+        $no_anonymous_thread = factory('App\Models\Thread')->create(['user_id' => $user->id]);
+        $response_no_anonymous_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $no_anonymous_thread->id, 'administration_type' => 'no_anonymous', 'reason' => $reason])
         ->assertStatus(409);
 
         $bianyuan_post = factory('App\Models\Post')->create(['user_id' => $user->id, 'is_bianyuan' => 1]);
@@ -704,6 +845,10 @@ class AdministrationTest extends TestCase
         ->assertStatus(404);
         $failed_response_bianyuan_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'bianyuan', 'reason' => $reason])
         ->assertStatus(404);
+        $failed_response_no_anonymous_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'no_anonymous', 'reason' => $reason])
+        ->assertStatus(404);
+        $failed_response_anonymous_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'anonymous', 'reason' => $reason])
+        ->assertStatus(404);
     }
 
     /** @test */
@@ -745,6 +890,10 @@ class AdministrationTest extends TestCase
         ->assertStatus(403);
         $response_bianyuan_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'bianyuan', 'reason' => $reason])
         ->assertStatus(403);
+        $response_no_anonymous_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'no_anonymous', 'reason' => $reason])
+        ->assertStatus(403);
+        $response_anonymous_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'anonymous', 'reason' => $reason])
+        ->assertStatus(403);
     }
 
     /** @test */
@@ -783,6 +932,10 @@ class AdministrationTest extends TestCase
         $response_no_bianyuan_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'no_bianyuan', 'reason' => $reason])
         ->assertStatus(401);
         $response_bianyuan_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'bianyuan', 'reason' => $reason])
+        ->assertStatus(401);
+        $response_no_anonymous_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'no_anonymous', 'reason' => $reason])
+        ->assertStatus(401);
+        $response_anonymous_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'anonymous', 'reason' => $reason])
         ->assertStatus(401);
     }
 }

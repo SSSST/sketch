@@ -46,6 +46,8 @@ class StoreAdministration extends FormRequest
         $item = $this->findItem(Request('administratable_id'), Request('administratable_type'));
         $administration_data = $this->only('report_id', 'administratable_type', 'administratable_id', 'administration_type', 'options', 'reason', 'is_public');
         if(is_null(Request('is_public'))) $administration_data['is_public'] = true;
+        $administration_type = ['no_anonymous']; // 待补充
+        if(in_array(Request('administration_type'), $administration_type)) $administration_data['options'] = null;
         $administration_data['administrator_id'] = auth('api')->id();
         $administration_data['administratee_id'] = $item->user_id;
 
@@ -101,6 +103,12 @@ class StoreAdministration extends FormRequest
             case 'no_bianyuan':
                 $this->changeIsBianyuan($thread, 1);
                 break;
+            case 'anonymous':
+                $this->changeIsAnonymous($thread, 0);
+                break;
+            case 'no_anonymous':
+                $this->changeIsAnonymous($thread, 1);
+                break;
             case 'delete':
                 $thread->delete();
                 break;
@@ -152,6 +160,12 @@ class StoreAdministration extends FormRequest
         return $item;
     }
 
+    private function getOptionsData($data)
+    {
+        $options = json_decode(Request('options'), true);
+        return $options[$data];
+    }
+
     private function changeIsLocked($thread, $is_locked)
     {
         if($thread->is_locked != $is_locked) {abort(409);}
@@ -163,6 +177,16 @@ class StoreAdministration extends FormRequest
     {
         if($thread->is_public != $is_public) {abort(409);}
         $thread->is_public = !$thread->is_public;
+        $thread->save();
+    }
+
+    private function changeIsAnonymous($thread, $is_anonymous)
+    {
+        if($thread->is_anonymous != $is_anonymous) {abort(409);}
+        $thread->is_anonymous = !$thread->is_anonymous;
+        if($thread->is_anonymous && $majia = $this->getOptionsData('majia')) {
+            $thread->majia = $majia;
+        }
         $thread->save();
     }
 
