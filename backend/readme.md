@@ -681,11 +681,11 @@ http://127.0.0.1:8000/api/manage
 必填项：  
 administratable_type(string):'user'|'thread'|'post'|'quote'|'status' 被管理内容类型  
 administratable_id(int) 被管理内容id  
-administration_type(string):'delete'|'lock'|'unlock'|'public'|'no_public'|'bianyuan'|'no_bianyuan'|'fold'|'unfold'|'anonymous'|'nno_anonymous'... 管理操作  
+administration_type(string):'delete'|'lock'|'unlock'|'public'|'no_public'|'bianyuan'|'no_bianyuan'|'fold'|'unfold'|'anonymous'|'nno_anonymous'|'change_channel'... 管理操作  
 reason(string) 原因  
 选填项：  
 report_id(int) 举报人id  
-options(json) 具体执行操作，包括'majia'...  
+options(json) 具体执行操作，包括'majia'|'channel_id'...  
 is_public(boolean) 是否公开
 
 ## 5. 如何测试

@@ -109,6 +109,9 @@ class StoreAdministration extends FormRequest
             case 'no_anonymous':
                 $this->changeIsAnonymous($thread, 1);
                 break;
+            case 'change_channel':
+                $this->changeChannel($thread);
+                break;
             case 'delete':
                 $thread->delete();
                 break;
@@ -164,6 +167,14 @@ class StoreAdministration extends FormRequest
     {
         $options = json_decode(Request('options'), true);
         return $options[$data];
+    }
+
+    private function changeChannel($thread)
+    {
+        $channel_id = $this->getOptionsData('channel_id');
+        if(!$channel_id || $channel_id == $thread->channel_id) {abort(409);}
+        $thread->channel_id = $channel_id;
+        $thread->save();
     }
 
     private function changeIsLocked($thread, $is_locked)

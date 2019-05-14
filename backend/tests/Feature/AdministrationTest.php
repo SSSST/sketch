@@ -635,6 +635,66 @@ class AdministrationTest extends TestCase
     }
 
     /** @test */
+    public function admin_can_change_channel() // 管理员可以转换帖子的channel
+    {
+        $admin = factory('App\Models\User')->create();
+        DB::table('role_user')->insert([
+            'user_id' => $admin->id,
+            'role' => 'admin',
+        ]);
+        $this->actingAs($admin, 'api');
+        $user = factory('App\Models\User')->create();
+        $reason = 'change channel';
+        $options_data = ['channel_id' => 2];
+        $options = json_encode($options_data);
+
+        $thread = factory('App\Models\Thread')->create(['user_id' => $user->id, 'channel_id' => 1]);
+        $response_change_channel = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'change_channel', 'reason' => $reason, 'options' => $options])
+        ->assertStatus(200)
+        ->assertJsonStructure([
+            'code',
+            'data' => [
+                'administration' => [
+                    'type',
+                    'id',
+                    'attributes' => [
+                        'administrator_id',
+                        'report_id',
+                        'administratable_type',
+                        'administratable_id',
+                        'administration_type',
+                        'reason',
+                        'options',
+                        'administratee_id',
+                        'is_public',
+                        'created_at',
+                    ],
+                ],
+            ],
+        ])
+        ->assertJson([
+            'code' => 200,
+            'data' => [
+                'administration' => [
+                    'type' => 'administration',
+                    'attributes' => [
+                        'administrator_id' => $admin->id,
+                        'administratable_type' => 'thread',
+                        'administratable_id' => $thread->id,
+                        'administration_type' => 'change_channel',
+                        'reason' => $reason,
+                        'options' => [
+                            'channel_id' => 2,
+                        ],
+                        'administratee_id' => $thread->user_id,
+                    ],
+                ],
+            ],
+        ]);
+        $this->assertEquals(2, $thread->fresh()->channel_id);
+    }
+
+    /** @test */
     public function admin_can_change_is_folded() // 管理员可以折叠/解折评论
     {
         $admin = factory('App\Models\User')->create();
@@ -779,6 +839,12 @@ class AdministrationTest extends TestCase
         $response_no_anonymous_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $no_anonymous_thread->id, 'administration_type' => 'no_anonymous', 'reason' => $reason])
         ->assertStatus(409);
 
+        $options_data = ['channel_id' => 1];
+        $options = json_encode($options_data);
+        $channel1_thread = factory('App\Models\Thread')->create(['user_id' => $user->id, 'channel_id' => 1]);
+        $response_change_channel = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $channel1_thread->id, 'administration_type' => 'change_channel', 'reason' => $reason, 'options' => $options])
+        ->assertStatus(409);
+
         $bianyuan_post = factory('App\Models\Post')->create(['user_id' => $user->id, 'is_bianyuan' => 1]);
         $response_bianyuan_post = $this->post('/api/manage', ['administratable_type' => 'post', 'administratable_id' => $bianyuan_post->id, 'administration_type' => 'bianyuan', 'reason' => $reason])
         ->assertStatus(409);
@@ -849,6 +915,8 @@ class AdministrationTest extends TestCase
         ->assertStatus(404);
         $failed_response_anonymous_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'anonymous', 'reason' => $reason])
         ->assertStatus(404);
+        $failed_response_change_channel = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'change_channel', 'reason' => $reason])
+        ->assertStatus(404);
     }
 
     /** @test */
@@ -894,6 +962,8 @@ class AdministrationTest extends TestCase
         ->assertStatus(403);
         $response_anonymous_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'anonymous', 'reason' => $reason])
         ->assertStatus(403);
+        $response_change_channel = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'change_channel', 'reason' => $reason])
+        ->assertStatus(403);
     }
 
     /** @test */
@@ -936,6 +1006,8 @@ class AdministrationTest extends TestCase
         $response_no_anonymous_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'no_anonymous', 'reason' => $reason])
         ->assertStatus(401);
         $response_anonymous_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'anonymous', 'reason' => $reason])
+        ->assertStatus(401);
+        $response_change_channel = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $thread->id, 'administration_type' => 'change_channel', 'reason' => $reason])
         ->assertStatus(401);
     }
 }
