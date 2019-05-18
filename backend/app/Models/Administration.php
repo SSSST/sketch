@@ -13,4 +13,14 @@ class Administration extends Model
     {
         return $this->morphTo();
     }
+
+    public function administrator()
+    {
+        return $this->belongsTo(User::class, 'administrator_id')->select('id', 'name', 'title_id');
+    }
+
+    public function administratee()
+    {
+        return $this->belongsTo(User::class, 'administratee_id')->select('id', 'name', 'title_id');
+    }
 }

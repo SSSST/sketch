@@ -182,16 +182,17 @@ class StoreAdministration extends FormRequest
     private function getOptionsData($data)
     {
         $options = json_decode(Request('options'), true);
-        return $options[$data];
+        return $options[$data] ?? null;
     }
 
     private function blockUser($user, $type)
     {
         $days = $this->getOptionsData('days');
         $hours = $this->getOptionsData('hours');
-        if(!$days && !hours) {abort(422);}
+        if(!$days && !$hours) {abort(422);}
 
-        if(!DB::table('role_user')->where('user_id', $user->id)->where('role', $type)->first()) {
+        $role_user = DB::table('role_user')->where('user_id', $user->id)->where('role', $type)->first();
+        if(!$role_user) {
             $role_user_data = [
                 'user_id' => $user->id,
                 'role' => $type,
@@ -210,6 +211,10 @@ class StoreAdministration extends FormRequest
     {
         $role_user = DB::table('role_user')->where('user_id', $user->id)->where('role', $type)->first();
         if(!$role_user) {abort(412);}
+
+        $now = Carbon::now();
+        $end_at = Carbon::parse($role_user->end_at);
+        if($now->gt($end_at)) {abort(412);}
 
         DB::table('role_user')->where('user_id', $user->id)->where('role', $type)->update([
             'end_at' => Carbon::now(),

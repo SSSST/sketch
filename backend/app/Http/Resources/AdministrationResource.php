@@ -27,17 +27,17 @@ class AdministrationResource extends JsonResource
             'type' => 'administration',
             'id' => (int)$this->id,
             'attributes' => [
-                'administrator_id' => (int)$this->administrator_id,
                 'report_id' => (int)$this->report_id,
                 'administratable_type' => (string)$this->administratable_type,
                 'administratable_id' => (int)$this->administratable_id,
                 'administration_type' => (string)$this->administration_type,
                 'options' => $options,
                 'reason' => (string)$this->reason,
-                'administratee_id' => (int)$this->administratee_id,
                 'is_public' => (bool)$this->is_public,
                 'created_at' => (string)$this->created_at,
             ],
+            'administrator' => new UserBriefResource($this->whenLoaded('administrator')),
+            'administratee' => new UserBriefResource($this->whenLoaded('administratee')),
         ];
     }
 }
