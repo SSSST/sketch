@@ -10,6 +10,7 @@ use App\Models\Thread;
 use App\Models\Post;
 use App\Models\Status;
 use App\Models\Quote;
+use Carbon\Carbon;
 
 class StoreAdministration extends FormRequest
 {
@@ -45,11 +46,14 @@ class StoreAdministration extends FormRequest
     {
         $item = $this->findItem(Request('administratable_id'), Request('administratable_type'));
         $administration_data = $this->only('report_id', 'administratable_type', 'administratable_id', 'administration_type', 'options', 'reason', 'is_public');
-        if(is_null(Request('is_public'))) $administration_data['is_public'] = true;
-        $administration_type = ['no_anonymous']; // 待补充
-        if(in_array(Request('administration_type'), $administration_type)) $administration_data['options'] = null;
         $administration_data['administrator_id'] = auth('api')->id();
-        $administration_data['administratee_id'] = $item->user_id;
+
+        $administration_type = ['anonymous', 'no_post', 'no_login', 'change_channel'];
+        if(!in_array(Request('administration_type'), $administration_type)) $administration_data['options'] = null;
+        if(is_null(Request('is_public'))) $administration_data['is_public'] = true;
+
+        if(Request('administratable_type') == 'user') $administration_data['administratee_id'] = $item->id;
+        else $administration_data['administratee_id'] = $item->user_id;
 
         $administration = DB::transaction(function() use($administration_data, $item) {
             $administration = Administration::create($administration_data);
@@ -79,7 +83,19 @@ class StoreAdministration extends FormRequest
 
     private function userManagement($user) //禁言、解禁、禁止登录、解禁登录
     {
-
+        $administration_type = Request('administration_type');
+        switch ($administration_type) {
+            case 'no_post':
+            case 'no_login':
+                $this->blockUser($user, $administration_type);
+                break;
+            case 'can_post':
+                $this->unblockUser($user, 'no_post'); // 第二个参数为role_user表中role应为的值
+                break;
+            case 'can_login':
+                $this->unblockUser($user, 'no_login');
+                break;
+        }
     }
 
     private function threadManagement($thread) // 删除、修改channel、匿名、非匿名、锁帖、解锁、边缘、非边缘
@@ -169,31 +185,62 @@ class StoreAdministration extends FormRequest
         return $options[$data];
     }
 
+    private function blockUser($user, $type)
+    {
+        $days = $this->getOptionsData('days');
+        $hours = $this->getOptionsData('hours');
+        if(!$days && !hours) {abort(422);}
+
+        if(!DB::table('role_user')->where('user_id', $user->id)->where('role', $type)->first()) {
+            $role_user_data = [
+                'user_id' => $user->id,
+                'role' => $type,
+                'reason' => Request('reason'),
+                'end_at' => Carbon::now()->addDays($days)->addHours($hours),
+            ];
+            return $role_user = DB::table('role_user')->insert($role_user_data);
+        }
+
+        DB::table('role_user')->where('user_id', $user->id)->where('role', $type)->update([
+            'end_at' => Carbon::parse($role_user->end_at)->addDays($days)->addHours($hours),
+        ]);
+    }
+
+    private function unblockUser($user, $type)
+    {
+        $role_user = DB::table('role_user')->where('user_id', $user->id)->where('role', $type)->first();
+        if(!$role_user) {abort(412);}
+
+        DB::table('role_user')->where('user_id', $user->id)->where('role', $type)->update([
+            'end_at' => Carbon::now(),
+        ]);
+    }
+
     private function changeChannel($thread)
     {
         $channel_id = $this->getOptionsData('channel_id');
-        if(!$channel_id || $channel_id == $thread->channel_id) {abort(409);}
+        if(!$channel_id || $channel_id == $thread->channel_id) {abort(412);}
         $thread->channel_id = $channel_id;
         $thread->save();
     }
 
     private function changeIsLocked($thread, $is_locked)
     {
-        if($thread->is_locked != $is_locked) {abort(409);}
+        if($thread->is_locked != $is_locked) {abort(412);}
         $thread->is_locked = !$thread->is_locked;
         $thread->save();
     }
 
     private function changeIsPublic($thread, $is_public)
     {
-        if($thread->is_public != $is_public) {abort(409);}
+        if($thread->is_public != $is_public) {abort(412);}
         $thread->is_public = !$thread->is_public;
         $thread->save();
     }
 
     private function changeIsAnonymous($thread, $is_anonymous)
     {
-        if($thread->is_anonymous != $is_anonymous) {abort(409);}
+        if($thread->is_anonymous != $is_anonymous) {abort(412);}
         $thread->is_anonymous = !$thread->is_anonymous;
         if($thread->is_anonymous && $majia = $this->getOptionsData('majia')) {
             $thread->majia = $majia;
@@ -203,14 +250,14 @@ class StoreAdministration extends FormRequest
 
     private function changeIsBianyuan($item, $is_bianyuan)
     {
-        if($item->is_bianyuan != $is_bianyuan) {abort(409);}
+        if($item->is_bianyuan != $is_bianyuan) {abort(412);}
         $item->is_bianyuan = !$item->is_bianyuan;
         $item->save();
     }
 
     private function changeIsFolded($post, $is_folded)
     {
-        if($post->is_folded != $is_folded) {abort(409);}
+        if($post->is_folded != $is_folded) {abort(412);}
         $post->is_folded = !$post->is_folded;
         $post->save();
     }

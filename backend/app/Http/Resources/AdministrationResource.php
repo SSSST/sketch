@@ -16,9 +16,10 @@ class AdministrationResource extends JsonResource
     {
         if($this->options) {
             $options_data = json_decode($this->options, true);
-            $options = [
-                key($options_data) => $options_data[key($options_data)],
-            ];
+            while($key = key($options_data)) {
+                $options[$key] = $options_data[$key];
+                next($options_data);
+            }
         } else {
             $options = NULL;
         }

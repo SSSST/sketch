@@ -793,6 +793,199 @@ class AdministrationTest extends TestCase
     }
 
     /** @test */
+    public function admin_can_ban_users() // 管理员可以禁言/解禁用户
+    {
+        $admin = factory('App\Models\User')->create();
+        DB::table('role_user')->insert([
+            'user_id' => $admin->id,
+            'role' => 'admin',
+        ]);
+        $this->actingAs($admin, 'api');
+        $user = factory('App\Models\User')->create();
+        $reason = 'user can not post';
+        $days = '1';
+        $hours = '1';
+        $options_data = ['days' => $days, 'hours' => $hours];
+        $options = json_encode($options_data);
+
+        $response_no_post = $this->post('/api/manage', ['administratable_type' => 'user', 'administratable_id' => $user->id, 'administration_type' => 'no_post', 'reason' => $reason, 'options' => $options])
+        ->assertStatus(200)
+        ->assertJsonStructure([
+            'code',
+            'data' => [
+                'administration' => [
+                    'type',
+                    'id',
+                    'attributes' => [
+                        'administrator_id',
+                        'report_id',
+                        'administratable_type',
+                        'administratable_id',
+                        'administration_type',
+                        'reason',
+                        'options' => [
+                            'days',
+                            'hours',
+                        ],
+                        'administratee_id',
+                        'is_public',
+                        'created_at',
+                    ],
+                ],
+            ],
+        ])
+        ->assertJson([
+            'code' => 200,
+            'data' => [
+                'administration' => [
+                    'type' => 'administration',
+                    'attributes' => [
+                        'administrator_id' => $admin->id,
+                        'administratable_type' => 'user',
+                        'administratable_id' => $user->id,
+                        'administration_type' => 'no_post',
+                        'reason' => $reason,
+                        'options' => [
+                            'days' => $days,
+                            'hours' => $hours,
+                        ],
+                        'administratee_id' => $user->id,
+                    ],
+                ],
+            ],
+        ]);
+
+        $response_can_post = $this->post('/api/manage', ['administratable_type' => 'user', 'administratable_id' => $user->id, 'administration_type' => 'can_post', 'reason' => $reason])
+        ->assertStatus(200)
+        ->assertJsonStructure([
+            'code',
+            'data' => [
+                'administration' => [
+                    'type',
+                    'id',
+                    'attributes' => [
+                        'administrator_id',
+                        'report_id',
+                        'administratable_type',
+                        'administratable_id',
+                        'administration_type',
+                        'reason',
+                        'options',
+                        'administratee_id',
+                        'is_public',
+                        'created_at',
+                    ],
+                ],
+            ],
+        ])
+        ->assertJson([
+            'code' => 200,
+            'data' => [
+                'administration' => [
+                    'type' => 'administration',
+                    'attributes' => [
+                        'administrator_id' => $admin->id,
+                        'administratable_type' => 'user',
+                        'administratable_id' => $user->id,
+                        'administration_type' => 'can_post',
+                        'reason' => $reason,
+                        'options' => NULL,
+                        'administratee_id' => $user->id,
+                    ],
+                ],
+            ],
+        ]);
+
+        $response_no_login = $this->post('/api/manage', ['administratable_type' => 'user', 'administratable_id' => $user->id, 'administration_type' => 'no_login', 'reason' => $reason, 'options' => $options])
+        ->assertStatus(200)
+        ->assertJsonStructure([
+            'code',
+            'data' => [
+                'administration' => [
+                    'type',
+                    'id',
+                    'attributes' => [
+                        'administrator_id',
+                        'report_id',
+                        'administratable_type',
+                        'administratable_id',
+                        'administration_type',
+                        'reason',
+                        'options' => [
+                            'days',
+                            'hours',
+                        ],
+                        'administratee_id',
+                        'is_public',
+                        'created_at',
+                    ],
+                ],
+            ],
+        ])
+        ->assertJson([
+            'code' => 200,
+            'data' => [
+                'administration' => [
+                    'type' => 'administration',
+                    'attributes' => [
+                        'administrator_id' => $admin->id,
+                        'administratable_type' => 'user',
+                        'administratable_id' => $user->id,
+                        'administration_type' => 'no_login',
+                        'reason' => $reason,
+                        'options' => [
+                            'days' => $days,
+                            'hours' => $hours,
+                        ],
+                        'administratee_id' => $user->id,
+                    ],
+                ],
+            ],
+        ]);
+
+        $response_can_login = $this->post('/api/manage', ['administratable_type' => 'user', 'administratable_id' => $user->id, 'administration_type' => 'can_login', 'reason' => $reason])
+        ->assertStatus(200)
+        ->assertJsonStructure([
+            'code',
+            'data' => [
+                'administration' => [
+                    'type',
+                    'id',
+                    'attributes' => [
+                        'administrator_id',
+                        'report_id',
+                        'administratable_type',
+                        'administratable_id',
+                        'administration_type',
+                        'reason',
+                        'options',
+                        'administratee_id',
+                        'is_public',
+                        'created_at',
+                    ],
+                ],
+            ],
+        ])
+        ->assertJson([
+            'code' => 200,
+            'data' => [
+                'administration' => [
+                    'type' => 'administration',
+                    'attributes' => [
+                        'administrator_id' => $admin->id,
+                        'administratable_type' => 'user',
+                        'administratable_id' => $user->id,
+                        'administration_type' => 'can_login',
+                        'reason' => $reason,
+                        'options' => NULL,
+                        'administratee_id' => $user->id,
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    /** @test */
     public function admin_can_not_make_a_wrong_management_to_an_item() // 管理员不能对帖子进行错误操作
     {
         $admin = factory('App\Models\User')->create();
@@ -806,60 +999,67 @@ class AdministrationTest extends TestCase
 
         $locked_thread = factory('App\Models\Thread')->create(['user_id' => $user->id, 'is_locked' => 1]);
         $response_lock = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $locked_thread->id, 'administration_type' => 'lock', 'reason' => $reason])
-        ->assertStatus(409);
+        ->assertStatus(412);
 
         $unlocked_thread = factory('App\Models\Thread')->create(['user_id' => $user->id]);
         $response_unlock = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $unlocked_thread->id, 'administration_type' => 'unlock', 'reason' => $reason])
-        ->assertStatus(409);
+        ->assertStatus(412);
 
         $private_thread = factory('App\Models\Thread')->create(['user_id' => $user->id, 'is_public' => 0]);
         $response_private = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $private_thread->id, 'administration_type' => 'no_public', 'reason' => $reason])
-        ->assertStatus(409);
+        ->assertStatus(412);
 
         $public_thread = factory('App\Models\Thread')->create(['user_id' => $user->id]);
         $response_public = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $public_thread->id, 'administration_type' => 'public', 'reason' => $reason])
-        ->assertStatus(409);
+        ->assertStatus(412);
 
         $bianyuan_thread = factory('App\Models\Thread')->create(['user_id' => $user->id, 'is_bianyuan' => 1]);
         $response_bianyuan_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $bianyuan_thread->id, 'administration_type' => 'bianyuan', 'reason' => $reason])
-        ->assertStatus(409);
+        ->assertStatus(412);
 
         $no_bianyuan_thread = factory('App\Models\Thread')->create(['user_id' => $user->id]);
         $response_no_bianyaun_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $no_bianyuan_thread->id, 'administration_type' => 'no_bianyuan', 'reason' => $reason])
-        ->assertStatus(409);
+        ->assertStatus(412);
 
         $majia = 'anonymous';
         $options_data = ['majia' => $majia];
         $options = json_encode($options_data);
         $anonymous_thread = factory('App\Models\Thread')->create(['user_id' => $user->id, 'is_anonymous' => 1]);
         $response_anonymous_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $anonymous_thread->id, 'administration_type' => 'anonymous', 'reason' => $reason, 'options' => $options])
-        ->assertStatus(409);
+        ->assertStatus(412);
 
         $no_anonymous_thread = factory('App\Models\Thread')->create(['user_id' => $user->id]);
         $response_no_anonymous_thread = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $no_anonymous_thread->id, 'administration_type' => 'no_anonymous', 'reason' => $reason])
-        ->assertStatus(409);
+        ->assertStatus(412);
 
         $options_data = ['channel_id' => 1];
         $options = json_encode($options_data);
         $channel1_thread = factory('App\Models\Thread')->create(['user_id' => $user->id, 'channel_id' => 1]);
         $response_change_channel = $this->post('/api/manage', ['administratable_type' => 'thread', 'administratable_id' => $channel1_thread->id, 'administration_type' => 'change_channel', 'reason' => $reason, 'options' => $options])
-        ->assertStatus(409);
+        ->assertStatus(412);
 
         $bianyuan_post = factory('App\Models\Post')->create(['user_id' => $user->id, 'is_bianyuan' => 1]);
         $response_bianyuan_post = $this->post('/api/manage', ['administratable_type' => 'post', 'administratable_id' => $bianyuan_post->id, 'administration_type' => 'bianyuan', 'reason' => $reason])
-        ->assertStatus(409);
+        ->assertStatus(412);
 
         $no_bianyuan_post = factory('App\Models\Post')->create(['user_id' => $user->id]);
         $response_no_bianyaun_post = $this->post('/api/manage', ['administratable_type' => 'post', 'administratable_id' => $no_bianyuan_post->id, 'administration_type' => 'no_bianyuan', 'reason' => $reason])
-        ->assertStatus(409);
+        ->assertStatus(412);
 
         $folded_post = factory('App\Models\Post')->create(['user_id' => $user->id, 'is_folded' => 1]);
         $response_fold = $this->post('/api/manage', ['administratable_type' => 'post', 'administratable_id' => $folded_post->id, 'administration_type' => 'fold', 'reason' => $reason])
-        ->assertStatus(409);
+        ->assertStatus(412);
 
         $unfolded_post = factory('App\Models\Post')->create(['user_id' => $user->id]);
         $response_unfold = $this->post('/api/manage', ['administratable_type' => 'post', 'administratable_id' => $unfolded_post->id, 'administration_type' => 'unfold', 'reason' => $reason])
-        ->assertStatus(409);
+        ->assertStatus(412);
+
+        $options_data = ['days' => '1', 'hours' => '1'];
+        $options = json_encode($options_data);
+        $response_can_post = $this->post('/api/manage', ['administratable_type' => 'user', 'administratable_id' => $user->id, 'administration_type' => 'can_post', 'reason' => $reason])
+        ->assertStatus(412);
+        $response_can_login = $this->post('/api/manage', ['administratable_type' => 'user', 'administratable_id' => $user->id, 'administration_type' => 'can_login', 'reason' => $reason])
+        ->assertStatus(412);
     }
 
     /** @test */
@@ -873,6 +1073,11 @@ class AdministrationTest extends TestCase
         $this->actingAs($admin, 'api');
         $user = factory('App\Models\User')->create();
         $reason = 'can not manage deleted item';
+
+        $failed_response_user_can_post = $this->post('/api/manage', ['administratable_type' => 'user', 'administratable_id' => 99999, 'administration_type' => 'can_post', 'reason' => $reason])
+        ->assertStatus(404);
+        $failed_response_user_can_login = $this->post('/api/manage', ['administratable_type' => 'user', 'administratable_id' => 99999, 'administration_type' => 'can_login', 'reason' => $reason])
+        ->assertStatus(404);
 
         $status = factory('App\Models\Status')->create(['user_id' => $user->id]);
         $response_status = $this->post('/api/manage', ['administratable_type' => 'status', 'administratable_id' => $status->id, 'administration_type' => 'delete', 'reason' => $reason])
@@ -927,6 +1132,16 @@ class AdministrationTest extends TestCase
         $user = factory('App\Models\User')->create();
         $reason = 'can not manage';
 
+        $user2 = factory('App\Models\User')->create();
+        $response_no_post_user = $this->post('/api/manage', ['administratable_type' => 'user', 'administratable_id' => $user2->id, 'administration_type' => 'no_post', 'reason' => $reason])
+        ->assertStatus(403);
+        $response_can_post_user = $this->post('/api/manage', ['administratable_type' => 'user', 'administratable_id' => $user2->id, 'administration_type' => 'can_post', 'reason' => $reason])
+        ->assertStatus(403);
+        $response_no_login_user = $this->post('/api/manage', ['administratable_type' => 'user', 'administratable_id' => $user2->id, 'administration_type' => 'no_login', 'reason' => $reason])
+        ->assertStatus(403);
+        $response_can_login_user = $this->post('/api/manage', ['administratable_type' => 'user', 'administratable_id' => $user2->id, 'administration_type' => 'can_login', 'reason' => $reason])
+        ->assertStatus(403);
+
         $status = factory('App\Models\Status')->create(['user_id' => $user->id]);
         $response_delete_status = $this->post('/api/manage', ['administratable_type' => 'status', 'administratable_id' => $status->id, 'administration_type' => 'delete', 'reason' => $reason])
         ->assertStatus(403);
@@ -971,6 +1186,15 @@ class AdministrationTest extends TestCase
     {
         $user = factory('App\Models\User')->create();
         $reason = 'can not manage';
+
+        $response_no_post_user = $this->post('/api/manage', ['administratable_type' => 'user', 'administratable_id' => $user->id, 'administration_type' => 'no_post', 'reason' => $reason])
+        ->assertStatus(401);
+        $response_can_post_user = $this->post('/api/manage', ['administratable_type' => 'user', 'administratable_id' => $user->id, 'administration_type' => 'can_post', 'reason' => $reason])
+        ->assertStatus(401);
+        $response_no_login_user = $this->post('/api/manage', ['administratable_type' => 'user', 'administratable_id' => $user->id, 'administration_type' => 'no_login', 'reason' => $reason])
+        ->assertStatus(401);
+        $response_can_login_user = $this->post('/api/manage', ['administratable_type' => 'user', 'administratable_id' => $user->id, 'administration_type' => 'can_login', 'reason' => $reason])
+        ->assertStatus(401);
 
         $status = factory('App\Models\Status')->create(['user_id' => $user->id]);
         $response_delete_status = $this->post('/api/manage', ['administratable_type' => 'status', 'administratable_id' => $status->id, 'administration_type' => 'delete', 'reason' => $reason])
