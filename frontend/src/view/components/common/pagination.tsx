@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Card } from './card';
 import { Link } from 'react-router-dom';
 import { URLParser } from '../../../utils/url';
+import { classnames } from '../../../utils/classname';
 
 export class Anchor extends React.Component <{
   className?:string;
@@ -60,7 +61,7 @@ export class Pagination extends React.Component <{
             page > this.props.currentPage - this.MiddleShowPages / 2 ) {
             return <li key={page}>
               <Link
-                className={`pagination-link ${page === this.props.currentPage && 'is-current'}`}
+                className={classnames('pagination-link', {'is-current': page === this.props.currentPage})}
                 to={(new URLParser()).setQuery('page', page).getPathname()}>{page}</Link>
             </li>;
           }

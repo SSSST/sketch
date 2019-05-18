@@ -6,6 +6,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
 const merge = require("webpack-merge");
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const FontAwesomeMinifyPlugin = require("font-awesome-minify-plugin");
 
 function commonConfig (devMode) {
   return {
@@ -44,7 +45,7 @@ function commonConfig (devMode) {
           }},
           'ts-loader',
         ]},
-        { test: /\.scss$/, use: [
+        { test: /\.s?css$/, use: [
           devMode ? { loader: 'style-loader', options: {
             singleton: true,
           }} : MiniCssExtractPlugin.loader,
@@ -61,8 +62,6 @@ function commonConfig (devMode) {
           { loader: 'url-loader', options: {
             name: "[name]-[hash:5].min.[ext]",
             limit: 8192,
-            publicPath: "assets/",
-            outputPath: "dist/assets/",
           }},
         ]},
       ]
@@ -125,7 +124,7 @@ const devConfig = {
     port: 2333,
     open: true,
     hot: true,
-    noInfo: true,
+    host: '0.0.0.0',
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
@@ -149,6 +148,7 @@ const prodConfig = {
       chunkFilename: '[id].min.css',
     }),
     new OptimizeCSSAssetsPlugin({}),
+    new FontAwesomeMinifyPlugin(),
     new CleanWebpackPlugin(["dist"], {
       root: path.resolve(__dirname),
       verbose: true,

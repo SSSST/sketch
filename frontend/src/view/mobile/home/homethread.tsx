@@ -32,7 +32,7 @@ export class HomeThread extends React.Component<MobileRouteProps, State> {
           text: data[idx].channel.attributes.channel_name,
           link: `/threads?channels=[${data[idx].channel.id}]`,
         }} key={idx}>
-          {<List children={data[idx].threads.map((thread) => <ThreadPreview mini data={thread} />)} />}
+          {<List children={data[idx].threads.map((thread) => <ThreadPreview mini data={thread} key={thread.id} />)} />}
         </Card>)}
     </Page>;
   }

@@ -38,7 +38,7 @@ export class Threads extends React.Component<MobileRouteProps, State> {
       <Pagination currentPage={data.paginate.current_page} lastPage={data.paginate.total_pages} />
       <Card>
         <List children={data.threads.map((thread) =>
-          <ThreadPreview data={thread} />)} />
+          <ThreadPreview data={thread} key={thread.id} />)} />
       </Card>
     </Page>;
   }

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import './page.scss';
+import { classnames } from '../../../utils/classname';
 
 export function Page (props:{
   children:React.ReactNode;
@@ -15,7 +16,7 @@ export function Page (props:{
       </div> 
     }
 
-    <div className={`body ${props.className || ''}`} style={props.style}>
+    <div className={classnames('body', props.className)} style={props.style}>
       {props.children}
     </div>
 

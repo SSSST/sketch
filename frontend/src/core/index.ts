@@ -4,7 +4,7 @@ import createHistory from 'history/createBrowserHistory';
 import { History, UnregisterCallback } from 'history';
 import { EventBus } from '../utils/events';
 import * as _ from 'lodash/core';
-import { Tag } from "./tag";
+import { TagHandler } from "./tag-handler";
 const debounce = require('lodash/debounce');
 
 export type History = History;
@@ -12,7 +12,7 @@ export type History = History;
 export class Core {
   public db:DB;
   public user:User;
-  public tag:Tag;
+  public tag:TagHandler;
   public history:History;
   public unlistenHistory:UnregisterCallback;
   public windowResizeEvent:EventBus<void>;
@@ -24,7 +24,7 @@ export class Core {
       console.log(action, location.pathname, location.state);
     });
 
-    this.tag = new Tag();
+    this.tag = new TagHandler();
     this.user = new User(this.history);
     this.db = new DB(this.user, this.history);
     this.windowResizeEvent = new EventBus();

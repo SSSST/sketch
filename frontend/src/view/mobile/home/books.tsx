@@ -3,7 +3,7 @@ import { MobileRouteProps } from '../router';
 import { API, ResData, ReqData } from '../../../config/api';
 import { URLParser } from '../../../utils/url';
 import { UnregisterCallback } from 'history';
-import { TagList } from '../../components/common/tag-list';
+import { TagFilter } from '../../components/common/tag-filter';
 import { HomeMenu } from './home-menu';
 import { ThreadPreview } from '../../components/home/thread-preview';
 import { Page } from '../../components/common/page';
@@ -16,7 +16,7 @@ interface State {
 }
 
 export class Books extends React.Component<MobileRouteProps, State> {
-  public state = {
+  public state:State = {
     data: {
       threads: [],
       paginate: ResData.allocThreadPaginate(),
@@ -65,7 +65,7 @@ export class Books extends React.Component<MobileRouteProps, State> {
 
   public render () {
     return <Page top={<HomeMenu />}>
-      <TagList
+      <TagFilter
         tags={this.state.tags}
         search={(pathname, tags) => {
           this.props.core.history.push(pathname, {tags});
@@ -79,7 +79,7 @@ export class Books extends React.Component<MobileRouteProps, State> {
       />
       <List
         children={this.state.data.threads.map((thread) =>
-          <ThreadPreview data={thread} />)}
+          <ThreadPreview data={thread} key={thread.id} />)}
       />
     </Page>;
   }

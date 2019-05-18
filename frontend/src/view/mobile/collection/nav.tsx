@@ -1,9 +1,8 @@
 import * as React from 'react';
-import { Menu, MenuPosition } from '../../components/common/menu';
+import { RouteMenu } from '../../components/common/route-menu';
 
 export function CollectionNav () {
-    return <Menu
-        position={MenuPosition.top}
+    return <RouteMenu
         items={[
             {to:'/collection/book', label: '文章'},
             {to:'/collection/thread', label: '讨论'},

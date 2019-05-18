@@ -11,6 +11,8 @@ import { Page } from '../../components/common/page';
 import { Card } from '../../components/common/card';
 import { Tab } from '../../components/common/tab';
 import { MainMenu } from '../main-menu';
+import { FilterBar } from '../../components/common/filter-bar';
+import { Dropdown } from '../../components/common/dropdown';
 interface State {
   data:API.Get['/'];
 }
@@ -41,7 +43,6 @@ export class HomeMain extends React.Component<MobileRouteProps, State> {
         quotes={this.state.data.quotes}
         core={this.props.core}
       />
-
       { !this.props.core.user.isLoggedIn() &&
         <Card style={{
         border: 'none',
@@ -58,12 +59,12 @@ export class HomeMain extends React.Component<MobileRouteProps, State> {
           {
             name: '最新更新',
             children: this.state.data.recent_added_chapter_books.map((book) => <BookPreview data={book} mini />),
-            more: '/books?ordered=latest_added_component',
+            // more: '/books?ordered=latest_added_component',
           },
           {
             name: '最新回复',
             children: this.state.data.recent_responded_books.map((book) => <BookPreview data={book} mini />),
-            more: '/books'
+            // more: '/books'
           }
         ]}
       />
@@ -73,7 +74,7 @@ export class HomeMain extends React.Component<MobileRouteProps, State> {
           {
             name: '最新讨论',
             children: this.state.data.recent_responded_threads.map((thread) => <ThreadPreview data={thread} mini />),
-            more: '/threads?ordered=latest_added_component',
+            // more: '/threads?ordered=latest_added_component',
           },
           // {
           //     name: '精华讨论',
@@ -88,7 +89,7 @@ export class HomeMain extends React.Component<MobileRouteProps, State> {
           {
             name: '最新动态',
             children: this.state.data.recent_statuses.map((status) => <StatusPreview status={status} />),
-            more: '/status/all',
+            // more: '/status/all',
           }
         ]}
       />

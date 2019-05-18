@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Menu, MenuPosition } from '../../components/common/menu';
+import { RouteMenu } from '../../components/common/route-menu';
 
 export function HomeMenu () {
   const items = [
@@ -13,8 +13,7 @@ export function HomeMenu () {
       onIndex = i;
     }
   }
-  return <Menu
-    position={MenuPosition.top}
+  return <RouteMenu
     items={items}
     onIndex={onIndex}
   />;

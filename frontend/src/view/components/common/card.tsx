@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
+import { classnames } from '../../../utils/classname';
 
 export function Card (props:{
   children?:React.ReactNode;
@@ -8,7 +9,7 @@ export function Card (props:{
   ref?:(el:HTMLDivElement|null) => void;
   title?:string|{text:string, link:string};
 }) {
-  return <div className={`card ${props.className || ''}`}
+  return <div className={classnames('card', props.className)}
     ref={(el) => props.ref && props.ref(el)}
     style={Object.assign({
       marginTop: '10px',

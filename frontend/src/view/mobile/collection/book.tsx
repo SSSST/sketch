@@ -32,7 +32,7 @@ export class CollectionBook extends React.Component<MobileRouteProps, State> {
         return (<Page top={<CollectionNav />}>
             <Pagination currentPage={data.paginate.current_page} lastPage={data.paginate.total_pages} />
             <Card>
-                <List children={data.threads.map((thread) => <BookPreview data={thread} />)} />
+                <List children={data.threads.map((thread) => <BookPreview data={thread} key={thread.id} />)} />
             </Card>
         </Page>);
     }
