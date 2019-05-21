@@ -45,15 +45,7 @@ class StoreAdministration extends FormRequest
     public function generate()
     {
         $item = $this->findItem(Request('administratable_id'), Request('administratable_type'));
-        $administration_data = $this->only('report_id', 'administratable_type', 'administratable_id', 'administration_type', 'options', 'reason', 'is_public');
-        $administration_data['administrator_id'] = auth('api')->id();
-
-        $administration_type = ['anonymous', 'no_post', 'no_login', 'change_channel'];
-        if(!in_array(Request('administration_type'), $administration_type)) $administration_data['options'] = null;
-        if(is_null(Request('is_public'))) $administration_data['is_public'] = true;
-
-        if(Request('administratable_type') == 'user') $administration_data['administratee_id'] = $item->id;
-        else $administration_data['administratee_id'] = $item->user_id;
+        $administration_data = $this->generateAdministrationData($item);
 
         $administration = DB::transaction(function() use($administration_data, $item) {
             $administration = Administration::create($administration_data);
@@ -155,6 +147,33 @@ class StoreAdministration extends FormRequest
         }
     }
 
+    private function generateAdministrationData($item)
+    {
+        $administration_data = $this->only('report_id', 'administratable_type', 'administratable_id', 'administration_type', 'options', 'reason', 'is_public');
+        $administration_data['administrator_id'] = auth('api')->id();
+
+        $administration_type = ['anonymous', 'no_post', 'no_login', 'change_channel'];
+        if(!in_array(Request('administration_type'), $administration_type)) $administration_data['options'] = null;
+        if(is_null(Request('is_public'))) $administration_data['is_public'] = true;
+
+        if(Request('administratable_type') == 'user') $administration_data['administratee_id'] = $item->id;
+        else $administration_data['administratee_id'] = $item->user_id;
+
+        return $administration_data;
+    }
+
+    private function generateRoleUser($user, $type, $days, $hours)
+    {
+        $role_user_data = [
+            'user_id' => $user->id,
+            'role' => $type,
+            'reason' => Request('reason'),
+            'end_at' => Carbon::now()->addDays($days)->addHours($hours),
+        ];
+
+        $role_user = DB::table('role_user')->insert($role_user_data);
+    }
+
     private function findItem($item_id, $item_type)
     {
         switch ($item_type) {
@@ -193,18 +212,12 @@ class StoreAdministration extends FormRequest
 
         $role_user = DB::table('role_user')->where('user_id', $user->id)->where('role', $type)->first();
         if(!$role_user) {
-            $role_user_data = [
-                'user_id' => $user->id,
-                'role' => $type,
-                'reason' => Request('reason'),
-                'end_at' => Carbon::now()->addDays($days)->addHours($hours),
-            ];
-            return $role_user = DB::table('role_user')->insert($role_user_data);
+            $this->generateRoleUser($user, $type, $days, $hours);
+        }else {
+            DB::table('role_user')->where('user_id', $user->id)->where('role', $type)->update([
+                'end_at' => Carbon::parse($role_user->end_at)->addDays($days)->addHours($hours),
+            ]);
         }
-
-        DB::table('role_user')->where('user_id', $user->id)->where('role', $type)->update([
-            'end_at' => Carbon::parse($role_user->end_at)->addDays($days)->addHours($hours),
-        ]);
     }
 
     private function unblockUser($user, $type)

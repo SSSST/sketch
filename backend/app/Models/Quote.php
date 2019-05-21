@@ -27,4 +27,9 @@ class Quote extends Model
     {
         return $this->morphMany('App\Models\Administration', 'administratable');
     }
+
+    public function reports()
+    {
+        return $this->morphMany('App\Models\Report', 'reportable');
+    }
 }

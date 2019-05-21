@@ -94,6 +94,11 @@ class User extends Authenticatable
         return $this->morphMany('App\Models\Administration', 'administratable');
     }
 
+    public function reports()
+    {
+        return $this->morphMany('App\Models\Report', 'reportable');
+    }
+
 
     /**
     * 查看对应用户的roles里面是否含有某种对应的global permission

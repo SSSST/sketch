@@ -70,6 +70,11 @@ class Post extends Model
         return $this->morphMany('App\Models\Administration', 'administratable');
     }
 
+    public function reports()
+    {
+        return $this->morphMany('App\Models\Report', 'reportable');
+    }
+
     public function scopeExclude($query, $value = array())
     {
         return $query->select( array_diff( $this->post_columns,(array) $value));

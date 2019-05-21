@@ -686,7 +686,22 @@ reason(string) 原因
 选填项：  
 report_id(int) 举报人id  
 options(json) 具体执行操作，包括'majia'|'channel_id'|'days'|'hours'...  
-is_public(boolean) 是否公开
+is_public(boolean) 是否公开  
+
+##### 4.5.12.2 用户可以进行举报操作  
+http://127.0.0.1:8000/api/report  
+方法：POST  
+授权：必须登录  
+必填项：  
+title(string):举报标题  
+brief(string):举报简介  
+body(string):举报正文  
+reportable_type(string):'user'|'thread'|'post'|'quote'|'status' 举报内容类型  
+reportable_id(int): 被举报内容id  
+report_kind(string):举报楼类型  
+report_kind(string):详细违规类型  
+选填项：  
+report_posts(json):举报一个thread多条post时需填，包括post_id,clip,reason  
 
 ## 5. 如何测试
 #### 5.1 写一个新的专项测试文件
