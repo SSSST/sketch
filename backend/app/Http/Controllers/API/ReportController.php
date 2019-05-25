@@ -11,9 +11,10 @@ class ReportController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('api:auth');
+        $this->middleware('auth:api');
     }
-    public function store(StoreReport $form)
+
+    public function report(StoreReport $form)
     {
         $report = $form->generate();
         return response()->success([

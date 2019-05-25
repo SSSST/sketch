@@ -15,14 +15,15 @@ class ReportResource extends JsonResource
     public function toArray($request)
     {
         if($this->report_posts) {
+            $report_posts = [];
             $report_posts_data = json_decode($this->report_posts, true);
-            while($key = key($report_posts_data)) {
-                $report_posts[$key] = $report_posts_data[$key];
-                next($report_posts_data);
+            for($i = 0; $i < count($report_posts_data); $i++){
+                array_push($report_posts, $report_posts_data[$i]);
             }
         } else {
             $report_posts = NULL;
         }
+
         return [
             'type' => 'report',
             'id' => (int)$this->id,
@@ -34,6 +35,7 @@ class ReportResource extends JsonResource
                 'report_type' => (string)$this->report_type,
                 'report_posts' => $report_posts,
                 'review_result' => (string)$this->review_result,
+                'created_at' => (string)$this->created_at,
             ],
         ];
     }

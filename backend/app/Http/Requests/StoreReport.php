@@ -2,11 +2,13 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 use App\Helpers\StringProcess;
 use DB;
+use Cache;
 use App\Models\Post;
 use App\Models\Report;
+use App\Models\Thread;
 
 class StoreReport extends FormRequest
 {
@@ -42,11 +44,11 @@ class StoreReport extends FormRequest
     public function generate()
     {
         $report_data = $this->only('reportable_type', 'reportable_id', 'report_kind', 'report_type', 'report_posts');
-        $post_data = $thie->generatePostData();
+        $post_data = $this->generatePostData();
 
         $report = DB::transaction(function() use($report_data, $post_data) {
             $post = Post::create($post_data);
-            $report_data['post_id'] = $post_id;
+            $report_data['post_id'] = $post->id;
             $report = Report::create($report_data);
             return $report;
         });
@@ -57,20 +59,23 @@ class StoreReport extends FormRequest
     private function generatePostData()
     {
         $post_data = $this->only('title', 'body');
-        if($this->isDuplicatePost($post_data)){abort(409);}
         $post_data['user_id'] = auth('api')->id();
-        $post_data['thread_id'] =
+        $post_data['thread_id'] = $this->getThreadId();
         $post_data['type'] = 'post';
         $post_data['brief'] = $this->brief ?: StringProcess::trimtext($this->body, config('constants.brief_len'));
         $post_data['creation_ip'] = request()->getClientIp();
         return $post_data;
     }
 
-    private function isDuplicatePost($post_data)
+    private function getThreadId()
     {
-        $last_post = Post::where('user_id', auth('api')->id())
-        ->orderBy('created_at', 'desc')
-        ->first();
-        return (!empty($last_post)) && (strcmp($last_post->body, $post_data['body']) === 0);
+        $report_kind = Request('report_kind');
+        if(Cache::has($report_kind)) return Cache::get($report_kind) ;
+
+        $thread = Thread::create([
+            'user_id' => auth('api')->id(),
+        ]);
+        Cache::forever($report_kind, $thread->id);
+        return $thread->id;
     }
 }

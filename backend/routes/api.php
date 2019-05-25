@@ -98,4 +98,4 @@ Route::apiResource('reward', 'API\RewardController')->only(['index', 'store', 'd
 
 // 管理部分
 Route::post('manage', 'API\AdminController@manage'); // 管理员执行管理操作
-Route::apiResource('report', 'API\ReportController')->only(['index', 'store']);
+Route::post('report', 'API\ReportController@report');
