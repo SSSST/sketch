@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
+use App\Models\Report;
+use DB;
 
 class ReportTest extends TestCase
 {
@@ -119,5 +121,59 @@ class ReportTest extends TestCase
 
         $response_user = $this->post('/api/report', ['title' => $title, 'brief' => $brief, 'body' => $body, 'reportable_type' => 'user', 'reportable_id' => $reported_user->id, 'report_kind' => 'unfriendly', 'report_type' => 'bad-lang'])
         ->assertStatus(401);
+    }
+
+    /** @test */
+    public function admin_can_review_report() //管理员可以审核举报内容
+    {
+        $admin = factory('App\Models\User')->create();
+        DB::table('role_user')->insert([
+            'user_id' => $admin->id,
+            'role' => 'admin',
+        ]);
+        $this->actingAs($admin, 'api');
+
+        $report = Report::first();
+        $title = 'review title';
+        $brief = 'review brief';
+        $body = 'review body';
+        $review_result = 'approved';
+
+        $response = $this->post('/api/report/'.$report->id.'/review', ['title' => $title, 'brief' => $brief, 'body' => $body, 'review_result' => $review_result])
+        ->assertStatus(200)
+        ->assertJsonStructure([
+            'code',
+            'data' => [
+                'report' => [
+                    'type',
+                    'id',
+                    'attributes' => [
+                        'post_id',
+                        'reportable_type',
+                        'reportable_id',
+                        'report_kind',
+                        'report_type',
+                        'report_posts',
+                        'review_result',
+                        'created_at',
+                    ],
+                ],
+            ],
+        ])
+        ->assertJson([
+            'code' => 200,
+            'data' => [
+                'report' => [
+                    'type' => 'report',
+                    'attributes' => [
+                        'reportable_type' => $report->reportable_type,
+                        'reportable_id' => $report->reportable_id,
+                        'report_kind' => $report->report_kind,
+                        'report_type' => $report->report_type,
+                        'review_result' => $review_result,
+                    ],
+                ],
+            ],
+        ]);
     }
 }

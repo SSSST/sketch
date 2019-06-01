@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreReport;
 use App\Http\Resources\ReportResource;
+use App\Models\Report;
 
 class ReportController extends Controller
 {
@@ -19,6 +20,14 @@ class ReportController extends Controller
         $report = $form->generate();
         return response()->success([
             'report' => new ReportResource($report),
+        ]);
+    }
+
+    public function review(Report $report, StoreReport $form)
+    {
+        $update_report = $form->reviewReport($report);
+        return response()->success([
+            'report' => new ReportResource($update_report),
         ]);
     }
 }

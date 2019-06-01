@@ -701,7 +701,17 @@ reportable_id(int): 被举报内容id
 report_kind(string):举报楼类型  
 report_kind(string):详细违规类型  
 选填项：  
-report_posts(json):举报一个thread多条post时需填，包括post_id,clip,reason  
+report_posts(json):举报一个thread多条post时需填，包括post_id,clip,reason
+
+##### 4.5.12.3 管理员可以审核report  
+ http://127.0.0.1:8000/api/report/{report}/review  
+ 方法：POST  
+ 授权：必须登录，且登录用户为管理员  
+ 必填项：  
+ title(string):审核标题  
+ brief(string):审核简介  
+ body(string):审核正文  
+ review_result(string): 'approved'|'modified'|'rejected'|'abuse' 审核结果 
 
 ## 5. 如何测试
 #### 5.1 写一个新的专项测试文件

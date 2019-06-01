@@ -33,11 +33,12 @@ class StoreReport extends FormRequest
             'title' => 'string|max:50',
             'brief' => 'string|max:50',
             'body' => 'string|max:20000',
-            'reportable_type' => 'required|string',
-            'reportable_id' => 'required|numeric',
-            'report_kind' => 'required|string',
-            'report_type' => 'required|string',
+            'reportable_type' => 'string',
+            'reportable_id' => 'numeric',
+            'report_kind' => 'string',
+            'report_type' => 'string',
             'report_posts' => 'json',
+            'review_result' => 'string',
         ];
     }
 
@@ -56,12 +57,38 @@ class StoreReport extends FormRequest
         return $report;
     }
 
-    private function generatePostData()
+    public function reviewReport(Report $report)
+    {
+        if(!auth('api')->user()->isAdmin()) {abort(403);}
+
+        $post = POST::find($report->post_id);
+        $review_result = Request('review_result');
+        $review_post_data = $this->generatePostData('reportRev', $post);
+
+        $update_report = DB::transaction(function() use($report, $review_post_data, $review_result) {
+            $post = POST::create($review_post_data);
+            $report->update([
+                'review_result' => $review_result,
+            ]);
+            return $report;
+        });
+
+        return $update_report;
+    }
+
+    private function generatePostData($type = null, $post = null)
     {
         $post_data = $this->only('title', 'body');
         $post_data['user_id'] = auth('api')->id();
-        $post_data['thread_id'] = $this->getThreadId();
-        $post_data['type'] = 'post';
+        if($post == null) { // report
+            $post_data['thread_id'] = $this->getThreadId();
+            $post_data['type'] = 'post';
+        }else{ // reportRev
+            $post_data['thread_id'] = $post->thread_id;
+            $post_data['type'] = $type;
+            $post_data['reply_id'] = $post->id;
+            $post_data['reply_brief'] = $post->brief;
+        }
         $post_data['brief'] = $this->brief ?: StringProcess::trimtext($this->body, config('constants.brief_len'));
         $post_data['creation_ip'] = request()->getClientIp();
         return $post_data;
