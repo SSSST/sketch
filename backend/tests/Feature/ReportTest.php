@@ -37,6 +37,17 @@ class ReportTest extends TestCase
                         'created_at',
                     ],
                 ],
+                'post' => [
+                    'type',
+                    'id',
+                    'attributes' => [
+                        'post_type',
+                        'thread_id',
+                        'title',
+                        'brief',
+                        'body',
+                    ],
+                ],
             ],
         ])
         ->assertJson([
@@ -49,6 +60,15 @@ class ReportTest extends TestCase
                         'reportable_id' => $reported_user->id,
                         'report_kind' => 'unfriendly',
                         'report_type' => 'bad-lang',
+                    ],
+                ],
+                'post' => [
+                    'type' => 'post',
+                    'attributes' => [
+                        'post_type' => 'post',
+                        'title' => $title,
+                        'brief' => $brief,
+                        'body' => $body,
                     ],
                 ],
             ],
@@ -91,6 +111,17 @@ class ReportTest extends TestCase
                         'created_at',
                     ],
                 ],
+                'post' => [
+                    'type',
+                    'id',
+                    'attributes' => [
+                        'post_type',
+                        'thread_id',
+                        'title',
+                        'brief',
+                        'body',
+                    ],
+                ],
             ],
         ])
         ->assertJson([
@@ -104,6 +135,15 @@ class ReportTest extends TestCase
                         'report_kind' => 'unfriendly',
                         'report_type' => 'bad-lang',
                         'report_posts' => $report_posts_data,
+                    ],
+                ],
+                'post' => [
+                    'type' => 'post',
+                    'attributes' => [
+                        'post_type' => 'post',
+                        'title' => $title,
+                        'brief' => $brief,
+                        'body' => $body,
                     ],
                 ],
             ],
@@ -158,6 +198,18 @@ class ReportTest extends TestCase
                         'created_at',
                     ],
                 ],
+                'post' => [
+                    'type',
+                    'id',
+                    'attributes' => [
+                        'post_type',
+                        'title',
+                        'brief',
+                        'body',
+                        'reply_id',
+                        'reply_brief',
+                    ],
+                ],
             ],
         ])
         ->assertJson([
@@ -173,7 +225,46 @@ class ReportTest extends TestCase
                         'review_result' => $review_result,
                     ],
                 ],
+                'post' => [
+                    'type' => 'post',
+                    'attributes' => [
+                        'post_type' => 'reportRev',
+                        'title' => $title,
+                        'brief' => $brief,
+                        'body' => $body,
+                        'reply_id' => $report->post_id,
+                    ],
+                ],
             ],
         ]);
+    }
+
+    /** @test */
+    public function user_can_not_review_report() //用户不可以审核举报内容
+    {
+        $user = factory('App\Models\User')->create();
+        $this->actingAs($user, 'api');
+
+        $report = Report::first();
+        $title = 'review title';
+        $brief = 'review brief';
+        $body = 'review body';
+        $review_result = 'approved';
+
+        $response = $this->post('/api/report/'.$report->id.'/review', ['title' => $title, 'brief' => $brief, 'body' => $body, 'review_result' => $review_result])
+        ->assertStatus(403);
+    }
+
+    /** @test */
+    public function guest_can_not_review_report() //游客不可以审核举报内容
+    {
+        $report = Report::first();
+        $title = 'review title';
+        $brief = 'review brief';
+        $body = 'review body';
+        $review_result = 'approved';
+
+        $response = $this->post('/api/report/'.$report->id.'/review', ['title' => $title, 'brief' => $brief, 'body' => $body, 'review_result' => $review_result])
+        ->assertStatus(401);
     }
 }

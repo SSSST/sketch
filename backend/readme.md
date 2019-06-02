@@ -698,8 +698,8 @@ brief(string):举报简介
 body(string):举报正文  
 reportable_type(string):'user'|'thread'|'post'|'quote'|'status' 举报内容类型  
 reportable_id(int): 被举报内容id  
-report_kind(string):举报楼类型  
-report_kind(string):详细违规类型  
+report_kind(string):'unfriendly'|'violation'...举报楼类型  
+report_kind(string):'badLang'|'unfriendly'|'futile'|'offPoint'...详细违规类型  
 选填项：  
 report_posts(json):举报一个thread多条post时需填，包括post_id,clip,reason
 
@@ -711,7 +711,7 @@ report_posts(json):举报一个thread多条post时需填，包括post_id,clip,re
  title(string):审核标题  
  brief(string):审核简介  
  body(string):审核正文  
- review_result(string): 'approved'|'modified'|'rejected'|'abuse' 审核结果 
+ review_result(string): 'approved'|'modified'|'rejected'|'abuse' 审核结果
 
 ## 5. 如何测试
 #### 5.1 写一个新的专项测试文件

@@ -47,14 +47,15 @@ class StoreReport extends FormRequest
         $report_data = $this->only('reportable_type', 'reportable_id', 'report_kind', 'report_type', 'report_posts');
         $post_data = $this->generatePostData();
 
-        $report = DB::transaction(function() use($report_data, $post_data) {
+        $data = DB::transaction(function() use($report_data, $post_data) {
             $post = Post::create($post_data);
             $report_data['post_id'] = $post->id;
-            $report = Report::create($report_data);
-            return $report;
+            $data['report'] = Report::create($report_data);
+            $data['post'] = $post;
+            return $data;
         });
 
-        return $report;
+        return $data;
     }
 
     public function reviewReport(Report $report)
@@ -65,15 +66,17 @@ class StoreReport extends FormRequest
         $review_result = Request('review_result');
         $review_post_data = $this->generatePostData('reportRev', $post);
 
-        $update_report = DB::transaction(function() use($report, $review_post_data, $review_result) {
+        $data = DB::transaction(function() use($report, $review_post_data, $review_result) {
             $post = POST::create($review_post_data);
             $report->update([
                 'review_result' => $review_result,
             ]);
-            return $report;
+            $data = ['report' => $report, 'post' => $post];
+
+            return $data;
         });
 
-        return $update_report;
+        return $data;
     }
 
     private function generatePostData($type = null, $post = null)
