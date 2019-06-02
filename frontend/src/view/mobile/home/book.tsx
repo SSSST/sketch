@@ -34,17 +34,15 @@ export class Book extends React.Component<MobileRouteProps, State> {
   public render () {
     const { data } = this.state;
     return (
-      <Page top={
-        <NavBar core={this.props.core} 
-        center={
-          <div className="buttons">
-            <Anchor className="button" isDisabled={true} to={''}>目录模式</Anchor>
-            <Anchor className="button" to={'' /* fixme: */}>论坛模式</Anchor>
-          </div>
-        }
-        right={<a className="button">+</a> /* fixme: */}
-        />
-      }>
+      <Page 
+        top={
+          <NavBar goBack={this.props.core.history.goBack}>
+            <div className="buttons">
+              <Anchor className="button" isDisabled={true} to={''}>目录模式</Anchor>
+              <Anchor className="button" to={'' /* fixme: */}>论坛模式</Anchor>
+            </div> 
+          </NavBar>}
+        >
         <ThreadProfile thread={data.thread} />
         <ChapterList bookId={+this.props.match.params.id} chapters={data.chapters} />
 

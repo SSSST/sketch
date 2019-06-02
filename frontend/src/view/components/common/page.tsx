@@ -4,8 +4,8 @@ import { classnames } from '../../../utils/classname';
 
 export function Page (props:{
   children:React.ReactNode;
-  top?:JSX.Element;
-  bottom?:JSX.Element;
+  top?:React.ReactNode;
+  bottom?:React.ReactNode;
   className?:string;
   style?:React.CSSProperties;
 }) {

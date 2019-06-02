@@ -5,29 +5,28 @@ import { ResData, } from '../../../config/api';
 import { Core } from '../../../core/index';
 
 interface Props {
-  quotes: ResData.Quote[];
-  core: Core;
+  quotes:ResData.Quote[];
+  core:Core;
 }
 
 interface State {
-  index: number
+  index:number;
 }
 
 export class Quotes extends React.Component<Props, State> {
   public state = {
-    index: 0
-  }
+    index: 0,
+  };
 
   public render () {
     return <div>
       <Carousel
         windowResizeEvent={this.props.core.windowResizeEvent}
-        slides={this.props.quotes.map((quote, i) => 
+        slides={this.props.quotes.map((quote, i) =>
           <div key={i}>
             <div>{quote.attributes.body}</div>
             <div>——{quote.attributes.is_anonymous ? quote.attributes.majia : quote.author.attributes.name}</div>
-          </div>
-          
+          </div>,
         )}
         getIndex={(index) => {this.setState({index : index})}}
         indicator={true}
@@ -36,12 +35,12 @@ export class Quotes extends React.Component<Props, State> {
 
       <div style={{margin:'10px 0 0 0'}}>
         {this.props.core.user.isLoggedIn() &&
-          <Link to='/createquote' className='button'>贡献题头</Link>
+          <Link to="/createquote" className="button">贡献题头</Link>
         }
         <a className="button is-pulled-right" /*onClick={()=>} TODO: 投掷咸鱼*/>
           咸鱼 {this.props.quotes[this.state.index] ? this.props.quotes[this.state.index].attributes.xianyu : 0}
         </a>
       </div>
-    </div>
+    </div>;
   }
 }

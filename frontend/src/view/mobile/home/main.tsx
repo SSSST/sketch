@@ -11,8 +11,6 @@ import { Page } from '../../components/common/page';
 import { Card } from '../../components/common/card';
 import { Tab } from '../../components/common/tab';
 import { MainMenu } from '../main-menu';
-import { FilterBar } from '../../components/common/filter-bar';
-import { Dropdown } from '../../components/common/dropdown';
 interface State {
   data:API.Get['/'];
 }

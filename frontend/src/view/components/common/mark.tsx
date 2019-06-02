@@ -16,7 +16,7 @@ export class Mark extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      currentValue: this.props.mark ? this.props.mark - 1 : -1,
+      currentValue: -1,
       value: -1,
     }
   }
@@ -75,7 +75,7 @@ export class Mark extends React.Component<Props, State> {
             key={k}
           > 
             <i className={
-                k <= currentValue
+                k <= (mark === undefined ? currentValue : mark - 1)
                   ? "fas fa-star"
                   : "far fa-star"
             }>

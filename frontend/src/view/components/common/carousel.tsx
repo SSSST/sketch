@@ -6,7 +6,7 @@ import './carousel.scss';
 interface Props {
   slides:JSX.Element[];
   afterSlides?:JSX.Element[];
-  getIndex?: (index:number) => void;
+  getIndex?:(index:number) => void;
   indicator?:boolean;
   windowResizeEvent:EventBus<void>;
   startIndex?:number;

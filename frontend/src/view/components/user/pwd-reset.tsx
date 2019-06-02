@@ -22,9 +22,7 @@ export class PasswordReset extends React.Component<Props, State> {
     return <Card>
       <div className="card-content">
 
-      {this.state.errorMsg && <NoticeBar 
-        text={this.state.errorMsg}
-      />}
+      {this.state.errorMsg && <NoticeBar>{this.state.errorMsg}</NoticeBar>}
 
       <input className="input is-normal is-fullwidth"
         type="email"

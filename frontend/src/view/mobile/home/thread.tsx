@@ -35,8 +35,13 @@ export class Thread extends React.Component<MobileRouteProps, State> {
   public render () {
     const { thread, paginate, posts } = this.state.data;
 
-    return <Page top={<NavBar core={this.props.core}
-        center={thread.attributes.title} /> }>
+    return <Page
+        top={
+          <NavBar goBack={this.props.core.history.goBack}>
+            {thread.attributes.title}
+          </NavBar>
+        }
+      >
       {/* <ThreadProfile data={thread} /> */}
       {posts.map((post, idx) => <Post data={post} key={idx} />)}
       <Pagination currentPage={paginate.current_page} lastPage={paginate.total_pages} />

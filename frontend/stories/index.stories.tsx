@@ -18,16 +18,18 @@ import { RouteMenu } from '../src/view/components/common/route-menu';
 import { Slider } from '../src/view/components/common/slider';
 import { Card } from '../src/view/components/common/card';
 import { Tab } from '../src/view/components/common/tab';
+import { Core } from '../src/core/index';
+import { NavBar } from '../src/view/components/common/navbar';
 
 import '@fortawesome/fontawesome-free-webfonts/css/fontawesome.css';
 import '@fortawesome/fontawesome-free-webfonts/css/fa-regular.css';
 import '@fortawesome/fontawesome-free-webfonts/css/fa-solid.css';
 import '@fortawesome/fontawesome-free-webfonts/css/fa-brands.css';
 import { Router } from 'react-router';
-import { createBrowserHistory } from 'history';
 
 import '../src/theme.scss';
 
+const core = new Core();
 addDecorator((storyFn, context) => withConsole()(storyFn)(context));
 addDecorator(withViewport());
 addDecorator(withKnobs);
@@ -173,7 +175,7 @@ storiesOf('Common Components', module)
           item['defaultColor'] = 'black';
         }
       }
-      return <Router history={createBrowserHistory()}>
+      return <Router history={core.history}>
           <RouteMenu
             items={items}
             onIndex={this.state.onIndex}
@@ -207,7 +209,7 @@ storiesOf('Common Components', module)
       )}
     </Slider>
   )
-  .add('tab', () => {
+  .add('Tab', () => {
     const tabContent = [1, 2, 3, 4, 5].map((tab) => {
       return {
         name: 'tab' + tab,
@@ -221,6 +223,12 @@ storiesOf('Common Components', module)
     return <Tab
       tabs={tabContent}
       onClickTab={action('onClickTab')}
+    />;
+  })
+  .add('Navbar', () => {
+    return <NavBar
+      core={core}
+      center={text('title', 'title')}
     />;
   });
 ;

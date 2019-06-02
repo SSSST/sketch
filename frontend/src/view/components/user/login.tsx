@@ -25,9 +25,7 @@ export class Login extends React.Component<Props, State> {
       <div className="card-header" style={{boxShadow: 'none'}}><h1 className="title">登录</h1></div>
         <div className="card-content">
 
-        { this.state.errMsg && <NoticeBar 
-          text={this.state.errMsg}
-        />}
+        { this.state.errMsg && <NoticeBar>{this.state.errMsg}</NoticeBar> }
 
         邮箱:
         <input className="input is-normal"

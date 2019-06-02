@@ -35,9 +35,7 @@ export class Register extends React.Component<Props, State> {
         <h1 className="title">注册</h1>
       </div>
       <div className="card-content">
-        {this.state.errMsg && <NoticeBar
-          text={this.state.errMsg}
-        />}
+        {this.state.errMsg && <NoticeBar>{this.state.errMsg}</NoticeBar>}
 
         用户名（笔名）：
         <input className={this.inputStyle}
@@ -50,13 +48,13 @@ export class Register extends React.Component<Props, State> {
           type="email"
           onChange={(ev) => this.setState({email: ev.target.value})}
         />
-        
+
         密码：
         <input className={this.inputStyle}
           type="password"
           onChange={(ev) => this.setState({pwd: ev.target.value})}
         />
-        
+
         确认密码：
         <input className={this.inputStyle}
           type="password"

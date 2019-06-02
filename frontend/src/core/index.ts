@@ -19,7 +19,6 @@ export class Core {
 
   constructor () {
     this.history = createHistory();
-    const location = this.history.location;
     this.unlistenHistory = this.history.listen((location, action) => {
       console.log(action, location.pathname, location.state);
     });

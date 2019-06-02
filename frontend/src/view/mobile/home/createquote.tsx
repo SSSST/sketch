@@ -29,12 +29,13 @@ export class CreateQuote extends React.Component<MobileRouteProps, State> {
     });
 
   public render () {
-    return <Page top={<NavBar core={this.props.core} center={'创建题头'}/>}>
+    return <Page
+        top={<NavBar goBack={this.props.core.history.goBack}>
+          创建题头 
+        </NavBar>}>
       {this.props.core.user.isLoggedIn() &&
         <Card>
-          {this.state.errorMsg && <NoticeBar
-            text={this.state.errorMsg} />
-          }
+          {this.state.errorMsg && <NoticeBar>{this.state.errorMsg}</NoticeBar>}
           新题头：
           <textarea className="textarea" 
             placeholder="不丧不成活~"
