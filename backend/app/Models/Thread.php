@@ -14,6 +14,8 @@ class Thread extends Model
     use SoftDeletes, ColumnTrait;
     use Traits\VoteTrait;
     use Traits\RewardTrait;
+    use Traits\AdministrationTrait;
+    use Traits\ReportTrait;
 
     protected $guarded = [];
     protected $hidden = [
@@ -69,17 +71,6 @@ class Thread extends Model
     {
         return $this->belongsToMany('App\Models\User', 'collections', 'thread_id', 'user_id')->select(['id','name']);
     }
-
-    public function administrations()
-    {
-        return $this->morphMany('App\Models\Administration', 'administratable');
-    }
-
-    public function reports()
-    {
-        return $this->morphMany('App\Models\Report', 'reportable');
-    }
-
 
     //以下是scopes
 

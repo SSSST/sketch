@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Quote extends Model
 {
     use Traits\VoteTrait;
+    use Traits\AdministrationTrait;
+    use Traits\ReportTrait;
     protected $guarded = [];
     const UPDATED_AT = null;
 
@@ -21,15 +23,5 @@ class Quote extends Model
     public function reviewer()
     {
         return $this->belongsTo(User::class, 'reviewer_id')->select('id','name', 'title_id');
-    }
-
-    public function administrations()
-    {
-        return $this->morphMany('App\Models\Administration', 'administratable');
-    }
-
-    public function reports()
-    {
-        return $this->morphMany('App\Models\Report', 'reportable');
     }
 }

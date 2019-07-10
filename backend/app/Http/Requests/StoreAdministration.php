@@ -35,8 +35,8 @@ class StoreAdministration extends FormRequest
             'report_id' => 'numeric',
             'administratable_type' => 'required|string',
             'administratable_id' => 'required|numeric',
-            'administration_type' => 'required|string',
-            'options' => 'json',
+            'administration_option' => 'required|numeric',
+            'option_attribute' => 'numeric',
             'reason' => 'required|string',
             'is_public' => 'boolean',
         ];
@@ -75,11 +75,11 @@ class StoreAdministration extends FormRequest
 
     private function userManagement($user) //禁言、解禁、禁止登录、解禁登录
     {
-        $administration_type = Request('administration_type');
-        switch ($administration_type) {
+        $administration_option = Request('administration_option');
+        switch ($administration_option) {
             case 'no_post':
             case 'no_login':
-                $this->blockUser($user, $administration_type);
+                $this->blockUser($user, $administration_option);
                 break;
             case 'can_post':
                 $this->unblockUser($user, 'no_post'); // 第二个参数为role_user表中role应为的值
@@ -92,23 +92,23 @@ class StoreAdministration extends FormRequest
 
     private function threadManagement($thread) // 删除、修改channel、匿名、非匿名、锁帖、解锁、边缘、非边缘
     {
-        switch (Request('administration_type')) {
-            case 'lock':
+        switch (Request('administration_option')) {
+            case 1:
                 $this->changeIsLocked($thread, 0); // 若要执行操作则帖子的is_locked应为0
                 break;
-            case 'unlock':
+            case 2:
                 $this->changeIsLocked($thread, 1);
                 break;
-            case 'public':
-                $this->changeIsPublic($thread, 0);
-                break;
-            case 'no_public':
+            case 3:
                 $this->changeIsPublic($thread, 1);
                 break;
-            case 'bianyuan':
+            case 4:
+                $this->changeIsPublic($thread, 0);
+                break;
+            case 15:
                 $this->changeIsBianyuan($thread, 0);
                 break;
-            case 'no_bianyuan':
+            case 16:
                 $this->changeIsBianyuan($thread, 1);
                 break;
             case 'anonymous':
@@ -120,7 +120,7 @@ class StoreAdministration extends FormRequest
             case 'change_channel':
                 $this->changeChannel($thread);
                 break;
-            case 'delete':
+            case 5:
                 $thread->delete();
                 break;
         }
@@ -128,17 +128,17 @@ class StoreAdministration extends FormRequest
 
     private function postManagement($post) // 删除、匿名、非匿名、折叠、非折叠、边缘、非边缘
     {
-        switch (Request('administration_type')) {
-            case 'bianyuan':
+        switch (Request('administration_option')) {
+            case 15:
                 $this->changeIsBianyuan($post, 0);
                 break;
-            case 'no_bianyuan':
+            case 16:
                 $this->changeIsBianyuan($post, 1);
                 break;
-            case 'fold':
+            case 11:
                 $this->changeIsFolded($post, 0);
                 break;
-            case 'unfold':
+            case 12:
                 $this->changeIsFolded($post, 1);
                 break;
             case 'delete':
@@ -149,11 +149,10 @@ class StoreAdministration extends FormRequest
 
     private function generateAdministrationData($item)
     {
-        $administration_data = $this->only('report_id', 'administratable_type', 'administratable_id', 'administration_type', 'options', 'reason', 'is_public');
+        $administration_data = $this->only('report_id', 'administratable_type', 'administratable_id', 'administration_option', 'options', 'reason', 'is_public');
         $administration_data['administrator_id'] = auth('api')->id();
 
-        $administration_type = ['anonymous', 'no_post', 'no_login', 'change_channel'];
-        if(!in_array(Request('administration_type'), $administration_type)) $administration_data['options'] = null;
+        if(Request('administration_option') != 13) $administration_data['option_attribute'] = null;
         if(is_null(Request('is_public'))) $administration_data['is_public'] = true;
 
         if(Request('administratable_type') == 'user') $administration_data['administratee_id'] = $item->id;

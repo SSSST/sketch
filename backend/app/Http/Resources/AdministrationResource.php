@@ -14,15 +14,8 @@ class AdministrationResource extends JsonResource
      */
     public function toArray($request)
     {
-        if($this->options) {
-            $options_data = json_decode($this->options, true);
-            while($key = key($options_data)) {
-                $options[$key] = $options_data[$key];
-                next($options_data);
-            }
-        } else {
-            $options = NULL;
-        }
+        $administration_option = $this->getOption($this->administration_option);
+
         return [
             'type' => 'administration',
             'id' => (int)$this->id,
@@ -30,8 +23,8 @@ class AdministrationResource extends JsonResource
                 'report_id' => (int)$this->report_id,
                 'administratable_type' => (string)$this->administratable_type,
                 'administratable_id' => (int)$this->administratable_id,
-                'administration_type' => (string)$this->administration_type,
-                'options' => $options,
+                'administration_option' => $administration_option,
+                'option_attribute' => (int)$this->option_attribute,
                 'reason' => (string)$this->reason,
                 'is_public' => (bool)$this->is_public,
                 'created_at' => (string)$this->created_at,
@@ -39,5 +32,11 @@ class AdministrationResource extends JsonResource
             'administrator' => new UserBriefResource($this->whenLoaded('administrator')),
             'administratee' => new UserBriefResource($this->whenLoaded('administratee')),
         ];
+    }
+
+    private function getOption($option)
+    {
+        $administration_option = config('constants.administrations');
+        return $administration_option[$option];
     }
 }

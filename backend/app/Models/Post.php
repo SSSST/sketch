@@ -11,6 +11,8 @@ class Post extends Model
     use SoftDeletes, ColumnTrait;
     use Traits\VoteTrait;
     use Traits\RewardTrait;
+    use Traits\AdministrationTrait;
+    use Traits\ReportTrait;
 
     protected $guarded = [];
     protected $post_types = array('chapter', 'question', 'answer', 'request', 'post', 'comment', 'review'); // post的分类类别
@@ -63,16 +65,6 @@ class Post extends Model
     public function tags()
     {
         return $this->belongsToMany('App\Models\Tag', 'tag_post', 'post_id', 'tag_id');
-    }
-
-    public function administrations()
-    {
-        return $this->morphMany('App\Models\Administration', 'administratable');
-    }
-
-    public function reports()
-    {
-        return $this->morphMany('App\Models\Report', 'reportable');
     }
 
     public function scopeExclude($query, $value = array())

@@ -14,6 +14,8 @@ use App\Helpers\ConstantObjects;
 class User extends Authenticatable
 {
     use HasApiTokens, Notifiable, SoftDeletes, ColumnTrait;
+    use Traits\AdministrationTrait;
+    use Traits\ReportTrait;
 
     /**
     * The attributes that are mass assignable.
@@ -87,16 +89,6 @@ class User extends Authenticatable
     public function collectedItems()
     {
         return $this->belongsToMany('App\Models\Thread', 'collection_count', 'user_id', 'thread_id');
-    }
-
-    public function administrations()
-    {
-        return $this->morphMany('App\Models\Administration', 'administratable');
-    }
-
-    public function reports()
-    {
-        return $this->morphMany('App\Models\Report', 'reportable');
     }
 
 

@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Status extends Model
 {
     use Traits\VoteTrait, SoftDeletes;
+    use Traits\AdministrationTrait;
+    use Traits\ReportTrait;
 
     protected $guarded = [];
     protected $dates = ['deleted_at'];
@@ -28,15 +30,5 @@ class Status extends Model
     public function attachable()
     {
         return $this->morphTo();
-    }
-
-    public function administrations()
-    {
-        return $this->morphMany('App\Models\Administration', 'administratable');
-    }
-
-    public function reports()
-    {
-        return $this->morphMany('App\Models\Report', 'reportable');
     }
 }
