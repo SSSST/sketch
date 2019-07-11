@@ -37,6 +37,8 @@ class StoreAdministration extends FormRequest
             'administratable_id' => 'required|numeric',
             'administration_option' => 'required|numeric',
             'option_attribute' => 'numeric',
+            'channel_id' => 'numeric',
+            'majia' => 'string',
             'reason' => 'required|string',
             'is_public' => 'boolean',
         ];
@@ -61,10 +63,10 @@ class StoreAdministration extends FormRequest
                     $this->postManagement($item);
                     break;
                 case 'status':
-                    $item->delete();
+                    $this->statusManagement($item);
                     break;
                 case 'quote':
-
+                    $this->quoteManagement($item);
                     break;
             }
             return $administration;
@@ -77,16 +79,18 @@ class StoreAdministration extends FormRequest
     {
         $administration_option = Request('administration_option');
         switch ($administration_option) {
-            case 'no_post':
-            case 'no_login':
+            case 16:
+            case 18:
                 $this->blockUser($user, $administration_option);
                 break;
-            case 'can_post':
-                $this->unblockUser($user, 'no_post'); // 第二个参数为role_user表中role应为的值
-                break;
-            case 'can_login':
+            case 17:
                 $this->unblockUser($user, 'no_login');
                 break;
+            case 19:
+                $this->unblockUser($user, 'no_post'); // 第二个参数为role_user表中role应为的值
+                break;
+            default:
+                abort(422);
         }
     }
 
@@ -105,54 +109,98 @@ class StoreAdministration extends FormRequest
             case 4:
                 $this->changeIsPublic($thread, 0);
                 break;
-            case 15:
-                $this->changeIsBianyuan($thread, 0);
-                break;
-            case 16:
-                $this->changeIsBianyuan($thread, 1);
-                break;
-            case 'anonymous':
-                $this->changeIsAnonymous($thread, 0);
-                break;
-            case 'no_anonymous':
-                $this->changeIsAnonymous($thread, 1);
-                break;
-            case 'change_channel':
-                $this->changeChannel($thread);
-                break;
             case 5:
                 $thread->delete();
                 break;
+            case 6:
+                $thread->restore();
+                break;
+            case 9:
+                $this->changeChannel($thread);
+                break;
+            case 12:
+                $this->anonymous($thread);
+                break;
+            case 13:
+                $this->noAnonymous($thread);
+                break;
+            case 14:
+                $this->changeIsBianyuan($thread, 1);
+                break;
+            case 15:
+                $this->changeIsBianyuan($thread, 0);
+                break;
+            default:
+                abort(422);
         }
     }
 
     private function postManagement($post) // 删除、匿名、非匿名、折叠、非折叠、边缘、非边缘
     {
         switch (Request('administration_option')) {
-            case 15:
-                $this->changeIsBianyuan($post, 0);
+            case 7:
+                $post->delete();
                 break;
-            case 16:
-                $this->changeIsBianyuan($post, 1);
+            case 8:
+                $post->restore();
+                break;
+            case 10:
+                $this->changeIsFolded($post, 1);
                 break;
             case 11:
                 $this->changeIsFolded($post, 0);
                 break;
             case 12:
-                $this->changeIsFolded($post, 1);
+                $this->anonymous($post);
                 break;
-            case 'delete':
-                $post->delete();
+            case 13:
+                $this->noAnonymous($post);
                 break;
+            case 14:
+                $this->changeIsBianyuan($post, 1);
+                break;
+            case 15:
+                $this->changeIsBianyuan($post, 0);
+                break;
+            default:
+                abort(422);
+        }
+    }
+
+    private function quoteManagement($quote)
+    {
+        switch (Request('administration_option')) {
+            case 12:
+                $this->anonymous($quote);
+                break;
+            case 13:
+                $this->noAnonymous($quote);
+                break;
+            default:
+                abort(422);
+        }
+    }
+
+    private function statusManagement($status)
+    {
+        switch (Request('administration_option')) {
+            case 20:
+                $status->delete();
+                break;
+            case 21:
+                $status->restore();
+                break;
+            default:
+                abort(422);
         }
     }
 
     private function generateAdministrationData($item)
     {
-        $administration_data = $this->only('report_id', 'administratable_type', 'administratable_id', 'administration_option', 'options', 'reason', 'is_public');
+        $administration_data = $this->only('report_id', 'administratable_type', 'administratable_id', 'administration_option', 'options', 'reason', 'is_public', 'option_attribute');
         $administration_data['administrator_id'] = auth('api')->id();
 
-        if(Request('administration_option') != 13) $administration_data['option_attribute'] = null;
+        if(!in_array(Request('administration_option'), [16, 18])) $administration_data['option_attribute'] = null;
         if(is_null(Request('is_public'))) $administration_data['is_public'] = true;
 
         if(Request('administratable_type') == 'user') $administration_data['administratee_id'] = $item->id;
@@ -161,13 +209,13 @@ class StoreAdministration extends FormRequest
         return $administration_data;
     }
 
-    private function generateRoleUser($user, $type, $days, $hours)
+    private function generateRoleUser($user, $type, $hours)
     {
         $role_user_data = [
             'user_id' => $user->id,
             'role' => $type,
             'reason' => Request('reason'),
-            'end_at' => Carbon::now()->addDays($days)->addHours($hours),
+            'end_at' => Carbon::now()->addHours($hours),
         ];
 
         $role_user = DB::table('role_user')->insert($role_user_data);
@@ -175,46 +223,44 @@ class StoreAdministration extends FormRequest
 
     private function findItem($item_id, $item_type)
     {
+        $is_deleted = false;
         switch ($item_type) {
             case 'user':
-                $item = User::findOrFail($item_id);
+                $item = User::withTrashed()->find($item_id);
                 break;
             case 'thread':
-                $item = Thread::findOrFail($item_id);
+                $item = Thread::withTrashed()->find($item_id);
                 break;
             case 'post':
-                $item = Post::findOrFail($item_id);
+                $item = Post::withTrashed()->find($item_id);
                 break;
             case 'status':
-                $item = Status::findOrFail($item_id);
+                $item = Status::withTrashed()->find($item_id);
                 break;
             case 'quote':
-                $item = Quote::findOrFail($item_id);
+                $item = Quote::withTrashed()->find($item_id);
                 break;
         }
 
-        if(!$item) abort(404);
+        if(!$item || $item->deleted_at) $is_deleted = true;
+        $restore_options = [6, 8, 21];
+        if($is_deleted && !in_array(Request('administration_option'), $restore_options)) {abort(404);} // 不属于恢复操作且找不到数据时
+        if(!$is_deleted && in_array(Request('administration_option'), $restore_options)) {abort(412);} // 属于恢复操作但数据并未被删除时
         return $item;
     }
 
-    private function getOptionsData($data)
+    private function blockUser($user, $option)
     {
-        $options = json_decode(Request('options'), true);
-        return $options[$data] ?? null;
-    }
-
-    private function blockUser($user, $type)
-    {
-        $days = $this->getOptionsData('days');
-        $hours = $this->getOptionsData('hours');
-        if(!$days && !$hours) {abort(422);}
+        $hours = Request('option_attribute');
+        if($option == 16) $type = 'no_login';
+        elseif ($option == 18) $type = 'no_post';
 
         $role_user = DB::table('role_user')->where('user_id', $user->id)->where('role', $type)->first();
         if(!$role_user) {
-            $this->generateRoleUser($user, $type, $days, $hours);
+            $this->generateRoleUser($user, $type, $hours);
         }else {
             DB::table('role_user')->where('user_id', $user->id)->where('role', $type)->update([
-                'end_at' => Carbon::parse($role_user->end_at)->addDays($days)->addHours($hours),
+                'end_at' => Carbon::parse($role_user->end_at)->addHours($hours),
             ]);
         }
     }
@@ -235,7 +281,7 @@ class StoreAdministration extends FormRequest
 
     private function changeChannel($thread)
     {
-        $channel_id = $this->getOptionsData('channel_id');
+        $channel_id = Request('channel_id');
         if(!$channel_id || $channel_id == $thread->channel_id) {abort(412);}
         $thread->channel_id = $channel_id;
         $thread->save();
@@ -255,14 +301,24 @@ class StoreAdministration extends FormRequest
         $thread->save();
     }
 
-    private function changeIsAnonymous($thread, $is_anonymous)
+    private function noAnonymous($item)
     {
-        if($thread->is_anonymous != $is_anonymous) {abort(412);}
-        $thread->is_anonymous = !$thread->is_anonymous;
-        if($thread->is_anonymous && $majia = $this->getOptionsData('majia')) {
-            $thread->majia = $majia;
+        if($item->is_anonymous != 1) {abort(412);} // 如果原来就未匿名还要执行取匿操作则报错
+
+        $item->is_anonymous = !$item->is_anonymous;
+        $item->save();
+    }
+
+    private function anonymous($item)
+    {
+        $majia = Request('majia');
+        if(!$majia || !strcmp($item->majia, $majia)) {abort(412);}
+        $item->majia = $majia;
+
+        if($item->is_anonymous == 0) {
+            $item->is_anonymous = !$item->is_anonymous;
+            $item->save();
         }
-        $thread->save();
     }
 
     private function changeIsBianyuan($item, $is_bianyuan)
