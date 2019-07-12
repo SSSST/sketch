@@ -197,7 +197,7 @@ class StoreAdministration extends FormRequest
 
     private function generateAdministrationData($item)
     {
-        $administration_data = $this->only('report_id', 'administratable_type', 'administratable_id', 'administration_option', 'options', 'reason', 'is_public', 'option_attribute');
+        $administration_data = $this->only('report_id', 'administratable_type', 'administratable_id', 'administration_option', 'reason', 'is_public', 'option_attribute');
         $administration_data['administrator_id'] = auth('api')->id();
 
         if(!in_array(Request('administration_option'), [16, 18])) $administration_data['option_attribute'] = null;
@@ -215,6 +215,7 @@ class StoreAdministration extends FormRequest
             'user_id' => $user->id,
             'role' => $type,
             'reason' => Request('reason'),
+            'created_at' => Carbon::now(),
             'end_at' => Carbon::now()->addHours($hours),
         ];
 
@@ -252,14 +253,17 @@ class StoreAdministration extends FormRequest
     private function blockUser($user, $option)
     {
         $hours = Request('option_attribute');
+        if(!$hours) {abort(412);}
         if($option == 16) $type = 'no_login';
         elseif ($option == 18) $type = 'no_post';
 
-        $role_user = DB::table('role_user')->where('user_id', $user->id)->where('role', $type)->first();
+        $role_user_builder = DB::table('role_user')->where('user_id', $user->id)->where('role', $type);
+        $role_user = $role_user_builder->first();
         if(!$role_user) {
             $this->generateRoleUser($user, $type, $hours);
         }else {
-            DB::table('role_user')->where('user_id', $user->id)->where('role', $type)->update([
+            $role_user_builder->update([
+                'is_valid' => 1,
                 'end_at' => Carbon::parse($role_user->end_at)->addHours($hours),
             ]);
         }
@@ -267,14 +271,12 @@ class StoreAdministration extends FormRequest
 
     private function unblockUser($user, $type)
     {
-        $role_user = DB::table('role_user')->where('user_id', $user->id)->where('role', $type)->first();
-        if(!$role_user) {abort(412);}
+        $role_user_builder = DB::table('role_user')->where('user_id', $user->id)->where('role', $type);
+        $role_user = $role_user_builder->first();
+        if(!$role_user || !$role_user->is_valid) {abort(412);}
 
-        $now = Carbon::now();
-        $end_at = Carbon::parse($role_user->end_at);
-        if($now->gt($end_at)) {abort(412);}
-
-        DB::table('role_user')->where('user_id', $user->id)->where('role', $type)->update([
+        $role_user_builder->update([
+            'is_valid' => 0,
             'end_at' => Carbon::now(),
         ]);
     }
@@ -305,20 +307,20 @@ class StoreAdministration extends FormRequest
     {
         if($item->is_anonymous != 1) {abort(412);} // 如果原来就未匿名还要执行取匿操作则报错
 
-        $item->is_anonymous = !$item->is_anonymous;
+        $item->is_anonymous = 0;
         $item->save();
     }
 
     private function anonymous($item)
     {
         $majia = Request('majia');
-        if(!$majia || !strcmp($item->majia, $majia)) {abort(412);}
-        $item->majia = $majia;
+        if((!$majia && !$item->majia) || !strcmp($item->majia, $majia)) {abort(412);}
+        if($majia) $item->majia = $majia;
 
         if($item->is_anonymous == 0) {
-            $item->is_anonymous = !$item->is_anonymous;
-            $item->save();
+            $item->is_anonymous = 1;
         }
+        $item->save();
     }
 
     private function changeIsBianyuan($item, $is_bianyuan)
