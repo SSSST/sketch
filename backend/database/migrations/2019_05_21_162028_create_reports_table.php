@@ -16,10 +16,10 @@ class CreateReportsTable extends Migration
         Schema::create('reports', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('post_id')->index(); // 举报楼里对应的post_id
+            $table->unsignedInteger('reporter_id')->index(); // 举报人id
             $table->morphs('reportable'); // thread|status|post|user|quote
-            $table->string('report_kind'); // 所属举报楼类型
-            $table->string('report_type'); // 违规原因细分
-            $table->json('report_posts')->nullable(); // 举报一个thread下的多个post所需，包括post_id,clip,reason
+            $table->string('report_kind'); // 举报类型
+            $table->json('report_posts')->nullable(); // 举报一个thread下的多个post所需
             $table->string('review_result')->nullable(); //审核结果
             $table->dateTime('created_at')->nullable();
             $table->dateTime('updated_at')->nullable();

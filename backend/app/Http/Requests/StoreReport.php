@@ -19,7 +19,8 @@ class StoreReport extends FormRequest
      */
     public function authorize()
     {
-        return auth('api')->check();
+        $level_limit = config('constants.level_limit');
+        return auth('api')->check() && auth('api')->user()->user_level >= $level_limit['can_report'];
     }
 
     /**
@@ -33,10 +34,9 @@ class StoreReport extends FormRequest
             'title' => 'string|max:50',
             'brief' => 'string|max:50',
             'body' => 'string|max:20000',
-            'reportable_type' => 'string',
-            'reportable_id' => 'numeric',
-            'report_kind' => 'string',
-            'report_type' => 'string',
+            'reportable_type' => 'required|string',
+            'reportable_id' => 'required|numeric',
+            'report_kind' => 'required|string',
             'report_posts' => 'json',
             'review_result' => 'string',
         ];
@@ -44,7 +44,7 @@ class StoreReport extends FormRequest
 
     public function generate()
     {
-        $report_data = $this->only('reportable_type', 'reportable_id', 'report_kind', 'report_type', 'report_posts');
+        $report_data = $this->only('reportable_type', 'reportable_id', 'report_kind', 'report_posts');
         $post_data = $this->generatePostData();
 
         $data = DB::transaction(function() use($report_data, $post_data) {

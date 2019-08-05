@@ -98,16 +98,16 @@ class StoreAdministration extends FormRequest
     {
         switch (Request('administration_option')) {
             case 1:
-                $this->changeIsLocked($thread, 0); // 若要执行操作则帖子的is_locked应为0
+                $this->changeAttribute($thread, 0, 'is_locked', 'threads'); // 若要执行操作则帖子的is_locked应为0
                 break;
             case 2:
-                $this->changeIsLocked($thread, 1);
+                $this->changeAttribute($thread, 1, 'is_locked', 'threads');
                 break;
             case 3:
-                $this->changeIsPublic($thread, 1);
+                $this->changeAttribute($thread, 1, 'is_public', 'threads');
                 break;
             case 4:
-                $this->changeIsPublic($thread, 0);
+                $this->changeAttribute($thread, 0, 'is_public', 'threads');
                 break;
             case 5:
                 $thread->delete();
@@ -122,13 +122,13 @@ class StoreAdministration extends FormRequest
                 $this->anonymous($thread);
                 break;
             case 13:
-                $this->noAnonymous($thread);
+                $this->changeAttribute($thread, 1, 'is_anonymous', 'threads');
                 break;
             case 14:
-                $this->changeIsBianyuan($thread, 1);
+                $this->changeAttribute($thread, 1, 'is_bianyuan', 'threads');
                 break;
             case 15:
-                $this->changeIsBianyuan($thread, 0);
+                $this->changeAttribute($thread, 0, 'is_bianyuan', 'threads');
                 break;
             default:
                 abort(422);
@@ -145,22 +145,22 @@ class StoreAdministration extends FormRequest
                 $post->restore();
                 break;
             case 10:
-                $this->changeIsFolded($post, 1);
+                $this->changeAttribute($post, 1, 'is_folded', 'posts');
                 break;
             case 11:
-                $this->changeIsFolded($post, 0);
+                $this->changeAttribute($post, 0, 'is_folded', 'posts');
                 break;
             case 12:
                 $this->anonymous($post);
                 break;
             case 13:
-                $this->noAnonymous($post);
+                $this->changeAttribute($post, 1, 'is_anonymous', 'posts');
                 break;
             case 14:
-                $this->changeIsBianyuan($post, 1);
+                $this->changeAttribute($post, 1, 'is_bianyuan', 'posts');
                 break;
             case 15:
-                $this->changeIsBianyuan($post, 0);
+                $this->changeAttribute($post, 0, 'is_bianyuan', 'posts');
                 break;
             default:
                 abort(422);
@@ -174,7 +174,7 @@ class StoreAdministration extends FormRequest
                 $this->anonymous($quote);
                 break;
             case 13:
-                $this->noAnonymous($quote);
+                $this->changeAttribute($quote, 1, 'is_anonymous', 'quotes');
                 break;
             default:
                 abort(422);
@@ -289,33 +289,11 @@ class StoreAdministration extends FormRequest
         $thread->save();
     }
 
-    private function changeIsLocked($thread, $is_locked)
-    {
-        if($thread->is_locked != $is_locked) {abort(412);}
-        $thread->is_locked = !$thread->is_locked;
-        $thread->save();
-    }
-
-    private function changeIsPublic($thread, $is_public)
-    {
-        if($thread->is_public != $is_public) {abort(412);}
-        $thread->is_public = !$thread->is_public;
-        $thread->save();
-    }
-
-    private function noAnonymous($item)
-    {
-        if($item->is_anonymous != 1) {abort(412);} // 如果原来就未匿名还要执行取匿操作则报错
-
-        $item->is_anonymous = 0;
-        $item->save();
-    }
-
     private function anonymous($item)
     {
         $majia = Request('majia');
-        if((!$majia && !$item->majia) || !strcmp($item->majia, $majia)) {abort(412);}
-        if($majia) $item->majia = $majia;
+        if((!$majia && !$item->majia) || !strcmp($item->majia, $majia)) {abort(412);} // 如果未输入majia或者输入majia与原来相同
+        if($majia) $item->majia = $majia; // 如果输入新majia则修改，否则使用之前提交的majia
 
         if($item->is_anonymous == 0) {
             $item->is_anonymous = 1;
@@ -323,17 +301,10 @@ class StoreAdministration extends FormRequest
         $item->save();
     }
 
-    private function changeIsBianyuan($item, $is_bianyuan)
+    private function changeAttribute($item, $value, $change_attribute, $table)
     {
-        if($item->is_bianyuan != $is_bianyuan) {abort(412);}
-        $item->is_bianyuan = !$item->is_bianyuan;
-        $item->save();
-    }
-
-    private function changeIsFolded($post, $is_folded)
-    {
-        if($post->is_folded != $is_folded) {abort(412);}
-        $post->is_folded = !$post->is_folded;
-        $post->save();
+        $attribute = DB::table($table)->where('id', $item->id)->value($change_attribute);
+        if($attribute != $value) {abort(412);}
+        $item->update([$change_attribute => !$attribute]);
     }
 }

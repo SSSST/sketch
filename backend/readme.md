@@ -693,17 +693,16 @@ is_public(boolean) 是否公开
 ##### 4.5.12.2 用户可以进行举报操作  
 http://127.0.0.1:8000/api/report  
 方法：POST  
-授权：必须登录  
+授权：必须登录且用户等级大于等于5    
 必填项：  
+reportable_type(string):'user'|'thread'|'post'|'quote'|'status' 举报内容类型  
+reportable_id(int): 被举报内容id  
+report_kind(string):'bad-lang'(粗话脏话辱骂)|'bad-label'（边限标记不规范）|'bring-BY'（在非午夜场楼引入午夜场内容）|'ads'（小广告）|'others'（其他举报，如车轱辘不友善/恋童）...举报类型  
+选填项：  
 title(string):举报标题  
 brief(string):举报简介  
 body(string):举报正文  
-reportable_type(string):'user'|'thread'|'post'|'quote'|'status' 举报内容类型  
-reportable_id(int): 被举报内容id  
-report_kind(string):'unfriendly'|'violation'...举报楼类型  
-report_kind(string):'badLang'|'unfriendly'|'futile'|'offPoint'...详细违规类型  
-选填项：  
-report_posts(json):举报一个thread多条post时需填，包括post_id,clip,reason
+report_posts(array):举报一个thread多条post时需填，为被举报的post的id数组  
 
 ##### 4.5.12.3 管理员可以审核report  
  http://127.0.0.1:8000/api/report/{report}/review  
