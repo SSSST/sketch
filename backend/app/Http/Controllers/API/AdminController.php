@@ -34,12 +34,20 @@ class AdminController extends Controller
         $type = $request->type;
         $thread_id = $request->thread_id;
 
-        DB::table('system_variables')->where('report_thread_type', $type)->where('is_valid', 1)->update(['is_valid' => 0]);
-        DB::table('system_variables')->insert([
-            'report_thread_id' => $thread_id,
-            'report_thread_type' => $type,
-            'is_valid' => 1,
-            'created_at' => Carbon::now(),
-        ]);
+        if(Thread::find($thread_id)->channel_id == 8) { // 如果帖子属于违规举报板块则可设置为当前举报楼
+            DB::transaction(function() use($thread_id, $type) {
+                DB::table('system_variables')->where('report_thread_type', $type)->where('is_valid', 1)->update(['is_valid' => 0]);
+                DB::table('system_variables')->insert([
+                    'report_thread_id' => $thread_id,
+                    'report_thread_type' => $type,
+                    'is_valid' => 1,
+                    'created_at' => Carbon::now(),
+                ]);
+            });
+
+            return response()->success(200);
+        }
+
+        return response()->error('config.412', 412);
     }
 }

@@ -17,7 +17,7 @@ class ReportTest extends TestCase
             'role' => 'admin',
         ]);
         $this->actingAs($admin, 'api');
-        $thread = factory('App\Models\Thread')->create();
+        $thread = factory('App\Models\Thread')->create(['channel_id' => 8]);
 
         $response = $this->post('/api/thread/updateToReport', ['thread_id' => $thread->id, 'type' => 1])
         ->assertStatus(200);
