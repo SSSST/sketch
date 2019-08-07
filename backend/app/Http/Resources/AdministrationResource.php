@@ -26,6 +26,7 @@ class AdministrationResource extends JsonResource
                 'administration_option' => $administration_option,
                 'option_attribute' => (int)$this->option_attribute,
                 'reason' => (string)$this->reason,
+                'record' => (string)$this->record,
                 'is_public' => (bool)$this->is_public,
                 'created_at' => (string)$this->created_at,
             ],

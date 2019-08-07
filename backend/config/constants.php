@@ -151,6 +151,13 @@ return [
     'level_limit' => [
         'can_report' => 5,
     ],
+
+    'report_kind' => [ // 还会修改
+        'bad-lang' => 1,
+        'bring-BY' => 2,
+        'ads' => 2,
+        'others' => 2,
+    ],
     // 'activities' => [
     //     '1' => '回复主题',
     //     '2' => '回复帖子',

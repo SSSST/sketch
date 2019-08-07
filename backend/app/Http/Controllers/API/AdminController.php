@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\API;
 
+use DB;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Models\Thread;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAdministration;
 use App\Http\Resources\AdministrationResource;
@@ -19,6 +22,24 @@ class AdminController extends Controller
         $administration = $form->generate();
         return response()->success([
             'administration' => new AdministrationResource($administration),
+        ]);
+    }
+
+    public function updateToReport(Request $request)
+    {
+        if(!auth('api')->user()->isAdmin()) {abort(403);}
+        $this->validate($request,[
+            $request->thread_id => 'unique:system_variables',
+        ]);
+        $type = $request->type;
+        $thread_id = $request->thread_id;
+
+        DB::table('system_variables')->where('report_thread_type', $type)->where('is_valid', 1)->update(['is_valid' => 0]);
+        DB::table('system_variables')->insert([
+            'report_thread_id' => $thread_id,
+            'report_thread_type' => $type,
+            'is_valid' => 1,
+            'created_at' => Carbon::now(),
         ]);
     }
 }

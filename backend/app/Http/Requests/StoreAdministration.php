@@ -11,6 +11,7 @@ use App\Models\Post;
 use App\Models\Status;
 use App\Models\Quote;
 use Carbon\Carbon;
+use App\Helpers\StringProcess;
 
 class StoreAdministration extends FormRequest
 {
@@ -199,6 +200,7 @@ class StoreAdministration extends FormRequest
     {
         $administration_data = $this->only('report_id', 'administratable_type', 'administratable_id', 'administration_option', 'reason', 'is_public', 'option_attribute');
         $administration_data['administrator_id'] = auth('api')->id();
+        $administration_data['record'] = $this->generateRecord($item, Request('administratable_type'));
 
         if(!in_array(Request('administration_option'), [16, 18])) $administration_data['option_attribute'] = null;
         if(is_null(Request('is_public'))) $administration_data['is_public'] = true;
@@ -207,6 +209,26 @@ class StoreAdministration extends FormRequest
         else $administration_data['administratee_id'] = $item->user_id;
 
         return $administration_data;
+    }
+
+    private function generateRecord($item, $type)
+    {
+        switch ($type) {
+            case 'thread':
+                $record = StringProcess::trimtext('《'.$item->title."》".$item->brief, 40);
+                break;
+            case 'post':
+                $record = StringProcess::trimtext($item->title.$item->body, 30);
+                break;
+            case 'status':
+            case 'quote':
+                $record = StringProcess::trimtext($item->body, 40);
+                break;
+            case 'user':
+                $record = $item->name;
+                break;
+        }
+        return $record;
     }
 
     private function generateRoleUser($user, $type, $hours)
@@ -239,7 +261,7 @@ class StoreAdministration extends FormRequest
                 $item = Status::withTrashed()->find($item_id);
                 break;
             case 'quote':
-                $item = Quote::withTrashed()->find($item_id);
+                $item = Quote::find($item_id);
                 break;
         }
 

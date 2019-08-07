@@ -21,6 +21,7 @@ class CreateAdministrationsTable extends Migration
             $table->integer('administration_option'); // 管理操作
             $table->integer('option_attribute')->nullable(); // 禁言天数
             $table->string('reason'); // 具体理由
+            $table->string('record');
             $table->unsignedInteger('administratee_id'); // 被处理人ID
             $table->boolean('is_public')->default(true); // 是否公开
             $table->dateTime('created_at')->nullable(); // 执行管理时间

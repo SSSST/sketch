@@ -2,6 +2,8 @@
 
 use Illuminate\Database\Seeder;
 use Carbon\Carbon;
+use App\Models\Thread;
+use App\Models\User;
 
 class DefaultSettingsSeeder extends Seeder
 {
@@ -655,8 +657,32 @@ class DefaultSettingsSeeder extends Seeder
         //     'invitation_times' => 10,
         //     'invite_until' => Carbon::now()->addYears(2),
         // ]);
-        DB::table('system_variables')->insert([
-            'latest_public_notice_id' => 0,
-        ]);
+
+        {// 系统变量
+            $user = factory(User::class)->create();
+            $unfriendly_thread = factory(Thread::class)->create([
+                'channel_id' => 8,
+                'user_id' => $user->id,
+            ]);
+            DB::table('system_variables')->insert([
+                'latest_public_notice_id' => 0,
+                'report_thread_id' => $unfriendly_thread->id,
+                'report_thread_type' => 1,
+                'created_at' => $unfriendly_thread->created_at,
+                'is_valid' => 1,
+            ]);
+
+            $violation_thread = factory(Thread::class)->create([
+                'channel_id' => 8,
+                'user_id' => $user->id,
+            ]);
+            DB::table('system_variables')->insert([
+                'latest_public_notice_id' => 0,
+                'report_thread_id' => $violation_thread->id,
+                'report_thread_type' => 2,
+                'created_at' => $violation_thread->created_at,
+                'is_valid' => 1,
+            ]);
+        }
     }
 }

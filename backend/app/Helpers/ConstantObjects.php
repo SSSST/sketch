@@ -61,7 +61,7 @@ class ConstantObjects
     public static function system_variable()//获得当前系统数据
     {
         return Cache::remember('system_variable', 10, function () {
-            return DB::table('system_variables')->first();
+            return DB::table('system_variables')->get();
         });
     }
 

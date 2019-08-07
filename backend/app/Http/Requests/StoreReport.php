@@ -9,6 +9,8 @@ use Cache;
 use App\Models\Post;
 use App\Models\Report;
 use App\Models\Thread;
+use Carbon\Carbon;
+use App\Helpers\ConstantObjects;
 
 class StoreReport extends FormRequest
 {
@@ -20,7 +22,8 @@ class StoreReport extends FormRequest
     public function authorize()
     {
         $level_limit = config('constants.level_limit');
-        return auth('api')->check() && auth('api')->user()->user_level >= $level_limit['can_report'];
+        $user_level = DB::table('user_infos')->where('user_id', auth('api')->id())->value('user_level');
+        return auth('api')->check() && $user_level >= $level_limit['can_report'];
     }
 
     /**
@@ -37,14 +40,16 @@ class StoreReport extends FormRequest
             'reportable_type' => 'required|string',
             'reportable_id' => 'required|numeric',
             'report_kind' => 'required|string',
-            'report_posts' => 'json',
+            'report_posts' => 'array',
             'review_result' => 'string',
         ];
     }
 
     public function generate()
     {
-        $report_data = $this->only('reportable_type', 'reportable_id', 'report_kind', 'report_posts');
+        $report_data = $this->only('reportable_type', 'reportable_id', 'report_kind');
+        $report_data['report_posts'] = json_encode(Request('report_posts'));
+        $report_data['reporter_id'] = auth('api')->id();
         $post_data = $this->generatePostData();
 
         $data = DB::transaction(function() use($report_data, $post_data) {
@@ -99,13 +104,15 @@ class StoreReport extends FormRequest
 
     private function getThreadId()
     {
-        $report_kind = Request('report_kind');
-        if(Cache::has($report_kind)) return Cache::get($report_kind) ;
+        $kind = Request('report_kind');
+        $report_kinds = config('constants.report_kind');
+        if(!in_array($kind, array_keys($report_kinds))) {abort(422);}
+        $report_thread_type = $report_kinds[$kind];
 
-        $thread = Thread::create([
-            'user_id' => auth('api')->id(),
-        ]);
-        Cache::forever($report_kind, $thread->id);
-        return $thread->id;
+        $thread = ConstantObjects::system_variable()
+            ->where('report_thread_type', $report_thread_type)
+            ->where('is_valid', 1)
+            ->first();
+        return $thread->report_thread_id;
     }
 }
