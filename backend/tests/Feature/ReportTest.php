@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
-use App\Models\Report;
 use DB;
 
 class ReportTest extends TestCase
@@ -58,17 +57,6 @@ class ReportTest extends TestCase
                         'created_at',
                     ],
                 ],
-                'post' => [
-                    'type',
-                    'id',
-                    'attributes' => [
-                        'post_type',
-                        'thread_id',
-                        'title',
-                        'brief',
-                        'body',
-                    ],
-                ],
             ],
         ])
         ->assertJson([
@@ -81,15 +69,6 @@ class ReportTest extends TestCase
                         'reportable_type' => 'user',
                         'reportable_id' => $reported_user->id,
                         'report_kind' => 'bad-lang',
-                    ],
-                ],
-                'post' => [
-                    'type' => 'post',
-                    'attributes' => [
-                        'post_type' => 'post',
-                        'title' => $title,
-                        'brief' => $brief,
-                        'body' => $body,
                     ],
                 ],
             ],
@@ -131,17 +110,6 @@ class ReportTest extends TestCase
                         'created_at',
                     ],
                 ],
-                'post' => [
-                    'type',
-                    'id',
-                    'attributes' => [
-                        'post_type',
-                        'thread_id',
-                        'title',
-                        'brief',
-                        'body',
-                    ],
-                ],
             ],
         ])
         ->assertJson([
@@ -154,15 +122,6 @@ class ReportTest extends TestCase
                         'reportable_id' => $thread->id,
                         'report_kind' => 'ads',
                         'report_posts' => $report_posts,
-                    ],
-                ],
-                'post' => [
-                    'type' => 'post',
-                    'attributes' => [
-                        'post_type' => 'post',
-                        'title' => $title,
-                        'brief' => $brief,
-                        'body' => $body,
                     ],
                 ],
             ],
@@ -182,108 +141,83 @@ class ReportTest extends TestCase
         ->assertStatus(401);
     }
 
-    // /** @test */
-    // public function admin_can_review_report() //管理员可以审核举报内容
-    // {
-    //     $admin = factory('App\Models\User')->create();
-    //     DB::table('role_user')->insert([
-    //         'user_id' => $admin->id,
-    //         'role' => 'admin',
-    //     ]);
-    //     $this->actingAs($admin, 'api');
-    //
-    //     $report = Report::first();
-    //     $title = 'review title';
-    //     $brief = 'review brief';
-    //     $body = 'review body';
-    //     $review_result = 'approved';
-    //
-    //     $response = $this->post('/api/report/'.$report->id.'/review', ['title' => $title, 'brief' => $brief, 'body' => $body, 'review_result' => $review_result])
-    //     ->assertStatus(200)
-    //     ->assertJsonStructure([
-    //         'code',
-    //         'data' => [
-    //             'report' => [
-    //                 'type',
-    //                 'id',
-    //                 'attributes' => [
-    //                     'post_id',
-    //                     'reportable_type',
-    //                     'reportable_id',
-    //                     'report_kind',
-    //                     'report_type',
-    //                     'report_posts',
-    //                     'review_result',
-    //                     'created_at',
-    //                 ],
-    //             ],
-    //             'post' => [
-    //                 'type',
-    //                 'id',
-    //                 'attributes' => [
-    //                     'post_type',
-    //                     'title',
-    //                     'brief',
-    //                     'body',
-    //                     'reply_id',
-    //                     'reply_brief',
-    //                 ],
-    //             ],
-    //         ],
-    //     ])
-    //     ->assertJson([
-    //         'code' => 200,
-    //         'data' => [
-    //             'report' => [
-    //                 'type' => 'report',
-    //                 'attributes' => [
-    //                     'reportable_type' => $report->reportable_type,
-    //                     'reportable_id' => $report->reportable_id,
-    //                     'report_kind' => $report->report_kind,
-    //                     'report_type' => $report->report_type,
-    //                     'review_result' => $review_result,
-    //                 ],
-    //             ],
-    //             'post' => [
-    //                 'type' => 'post',
-    //                 'attributes' => [
-    //                     'post_type' => 'reportRev',
-    //                     'title' => $title,
-    //                     'brief' => $brief,
-    //                     'body' => $body,
-    //                     'reply_id' => $report->post_id,
-    //                 ],
-    //             ],
-    //         ],
-    //     ]);
-    // }
-    //
-    // /** @test */
-    // public function user_can_not_review_report() //用户不可以审核举报内容
-    // {
-    //     $user = factory('App\Models\User')->create();
-    //     $this->actingAs($user, 'api');
-    //
-    //     $report = Report::first();
-    //     $title = 'review title';
-    //     $brief = 'review brief';
-    //     $body = 'review body';
-    //     $review_result = 'approved';
-    //
-    //     $response = $this->post('/api/report/'.$report->id.'/review', ['title' => $title, 'brief' => $brief, 'body' => $body, 'review_result' => $review_result])
-    //     ->assertStatus(403);
-    // }
-    //
-    // /** @test */
-    // public function guest_can_not_review_report() //游客不可以审核举报内容
-    // {
-    //     $report = Report::first();
-    //     $title = 'review title';
-    //     $brief = 'review brief';
-    //     $body = 'review body';
-    //     $review_result = 'approved';
-    //
-    //     $response = $this->post('/api/report/'.$report->id.'/review', ['title' => $title, 'brief' => $brief, 'body' => $body, 'review_result' => $review_result])
-    //     ->assertStatus(401);
-    // }
+    /** @test */
+    public function admin_can_review_report() //管理员可以审核举报内容
+    {
+        $admin = factory('App\Models\User')->create();
+        DB::table('role_user')->insert([
+            'user_id' => $admin->id,
+            'role' => 'admin',
+        ]);
+        $this->actingAs($admin, 'api');
+
+        $thread = factory('App\Models\Thread')->create();
+        $report = factory('App\Models\Report')->create(['reportable_id' => $thread->id, 'reportable_type' => 'thread']);
+        $title = 'review title';
+        $brief = 'review brief';
+        $body = 'review body';
+        $review_result = 'approved';
+        $reason = 'review reason';
+        $administration_option = [1];
+
+        $response = $this->post('/api/report/'.$report->id.'/review', ['title' => $title, 'brief' => $brief, 'body' => $body, 'review_result' => $review_result, 'reason' => $reason, 'administration_option' => $administration_option])
+        ->assertStatus(200)
+        ->assertJsonStructure([
+            'code',
+            'data' => [
+                'report' => [
+                    'type',
+                    'id',
+                    'attributes' => [
+                        'post_id',
+                        'reportable_type',
+                        'reportable_id',
+                        'report_kind',
+                        'report_posts',
+                        'review_result',
+                        'created_at',
+                        'updated_at',
+                    ],
+                ],
+            ],
+        ])
+        ->assertJson([
+            'code' => 200,
+            'data' => [
+                'report' => [
+                    'type' => 'report',
+                    'attributes' => [
+                        'post_id' => $report->post_id,
+                        'reportable_type' => $report->reportable_type,
+                        'reportable_id' => $report->reportable_id,
+                        'report_kind' => $report->report_kind,
+                        'review_result' => $review_result,
+                    ],
+                ],
+            ],
+        ]);
+
+        //$this->assertEquals(1, $thread->fresh()->is_locked);
+    }
+
+    /** @test */
+    public function user_or_guest_can_not_review_report() //用户不可以审核举报内容
+    {
+        $report = factory('App\Models\Report')->create();
+        $title = 'review title';
+        $brief = 'review brief';
+        $body = 'review body';
+        $review_result = 'approved';
+        $reason = 'review reason';
+        $administration_option = [1];
+
+        $response = $this->post('/api/report/'.$report->id.'/review', ['title' => $title, 'brief' => $brief, 'body' => $body, 'review_result' => $review_result, 'reason' => $reason, 'administration_option' => $administration_option])
+        ->assertStatus(401);
+
+        $user = factory('App\Models\User')->create();
+        $this->actingAs($user, 'api');
+
+        $response = $this->post('/api/report/'.$report->id.'/review', ['title' => $title, 'brief' => $brief, 'body' => $body, 'review_result' => $review_result, 'reason' => $reason, 'administration_option' => $administration_option])
+        ->assertStatus(403);
+    }
 }

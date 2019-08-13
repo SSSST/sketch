@@ -96,8 +96,8 @@ Route::apiResource('vote', 'API\VoteController')->only(['index', 'store', 'destr
 // 打赏
 Route::apiResource('reward', 'API\RewardController')->only(['index', 'store', 'destroy']);
 
-// 管理部分
+// 举报管理部分
 Route::post('manage', 'API\AdminController@manage'); // 管理员执行管理操作
 Route::post('thread/updateToReport', 'API\AdminController@updateToReport'); // 将thread设为默认举报楼
-Route::post('report/{report}/review', 'API\ReportController@review');
-Route::post('report', 'API\ReportController@report');
+Route::post('report/{report}/review', 'API\ReportController@review'); // 管理员审核举报
+Route::post('report', 'API\ReportController@report'); // 用户举报

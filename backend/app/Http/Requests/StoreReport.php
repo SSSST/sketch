@@ -5,15 +5,19 @@ namespace App\Http\Requests;
 use App\Http\Requests\FormRequest;
 use App\Helpers\StringProcess;
 use DB;
-use Cache;
 use App\Models\Post;
-use App\Models\Report;
 use App\Models\Thread;
+use App\Models\Report;
+use App\Models\Administration;
 use Carbon\Carbon;
 use App\Helpers\ConstantObjects;
+use App\Http\Requests\StoreAdministration;
+use App\Sosadfun\Traits\ManageTrait;
 
 class StoreReport extends FormRequest
 {
+    use ManageTrait;
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -22,8 +26,8 @@ class StoreReport extends FormRequest
     public function authorize()
     {
         $level_limit = config('constants.level_limit');
-        $user_level = DB::table('user_infos')->where('user_id', auth('api')->id())->value('user_level');
-        return auth('api')->check() && $user_level >= $level_limit['can_report'];
+        $user_level = auth('api')->user()->info()->value('user_level');
+        return auth('api')->check() && ($user_level >= $level_limit['can_report'] || auth('api')->user()->isAdmin());
     }
 
     /**
@@ -37,9 +41,9 @@ class StoreReport extends FormRequest
             'title' => 'string|max:50',
             'brief' => 'string|max:50',
             'body' => 'string|max:20000',
-            'reportable_type' => 'required|string',
-            'reportable_id' => 'required|numeric',
-            'report_kind' => 'required|string',
+            'reportable_type' => 'string',
+            'reportable_id' => 'numeric',
+            'report_kind' => 'string',
             'report_posts' => 'array',
             'review_result' => 'string',
         ];
@@ -52,36 +56,60 @@ class StoreReport extends FormRequest
         $report_data['reporter_id'] = auth('api')->id();
         $post_data = $this->generatePostData();
 
-        $data = DB::transaction(function() use($report_data, $post_data) {
+        $report = DB::transaction(function() use($report_data, $post_data) {
             $post = Post::create($post_data);
             $report_data['post_id'] = $post->id;
-            $data['report'] = Report::create($report_data);
-            $data['post'] = $post;
-            return $data;
+            $report = Report::create($report_data);
+            return $report;
         });
 
-        return $data;
+        return $report;
     }
 
     public function reviewReport(Report $report)
     {
-        if(!auth('api')->user()->isAdmin()) {abort(403);}
-
         $post = POST::find($report->post_id);
         $review_result = Request('review_result');
         $review_post_data = $this->generatePostData('reportRev', $post);
 
-        $data = DB::transaction(function() use($report, $review_post_data, $review_result) {
+        DB::transaction(function() use($report, $review_post_data, $review_result) {
             $post = POST::create($review_post_data);
             $report->update([
                 'review_result' => $review_result,
+                'updated_at' => Carbon::now(),
             ]);
-            $data = ['report' => $report, 'post' => $post];
 
-            return $data;
+            if(!strcmp($review_result, 'approved'))  {$this->manage($report);} // 如果审核通过则创建记录并执行操作
         });
 
-        return $data;
+        return $report;
+    }
+
+    private function manage($report)
+    {
+        $administration_options = Request('administration_option');
+        $item = $this->findItem($report->reportable_id, $report->reportable_type, $administration_options[0]);
+        foreach ($administration_options as $option) {
+            $administration_data = $this->generateAdministrationData($report, $item);
+            $administration_data['administration_option'] = $option;
+            $administration_data = $this->checkData($administration_data, $item);
+            $administration = Administration::create($administration_data);
+            $this->manageItem($item, $administration_data['administratable_type']);
+        }
+    }
+
+    private function generateAdministrationData($report, $item)
+    {
+        $administration_data = [
+            'report_id' => $report->id,
+            'administratable_type' => $report->reportable_type,
+            'administratable_id' => $report->reportable_id,
+            'option_attribute' => Request('option_attribute'),
+            'reason' => Request('reason'),
+            'is_public' => Request('is_public'),
+        ];
+
+        return $administration_data;
     }
 
     private function generatePostData($type = null, $post = null)

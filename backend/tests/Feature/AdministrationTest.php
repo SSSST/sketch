@@ -61,6 +61,7 @@ class AdministrationTest extends TestCase
                         'administratable_id' => $status->id,
                         'administration_option' => $this->administration_option[20],
                         'reason' => $reason,
+                        'is_public' => true,
                     ],
                 ],
             ],

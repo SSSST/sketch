@@ -32,6 +32,7 @@ class ReportResource extends JsonResource
                 'report_posts' => $report_posts,
                 'review_result' => (string)$this->review_result,
                 'created_at' => (string)$this->created_at,
+                'updated_at' => (string)$this->updated_at,
             ],
         ];
     }
