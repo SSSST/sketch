@@ -12,7 +12,7 @@ use App\Helpers\StringProcess;
 
 trait ManageTrait
 {
-    protected function findItem($item_id, $item_type)
+    protected function findItem($item_id, $item_type, $option = null)
     {
         $is_deleted = false;
         switch ($item_type) {
@@ -33,37 +33,39 @@ trait ManageTrait
                 break;
         }
 
+        $administration_option = $option ? $option : Request('administration_option');
         if(!$item || $item->deleted_at) $is_deleted = true;
         $restore_options = [6, 8, 21];
-        if($is_deleted && !in_array(Request('administration_option'), $restore_options)) {abort(404);} // 不属于恢复操作且找不到数据时
-        if(!$is_deleted && in_array(Request('administration_option'), $restore_options)) {abort(412);} // 属于恢复操作但数据并未被删除时
+        if($is_deleted && !in_array($administration_option, $restore_options)) {abort(404);} // 不属于恢复操作且找不到数据时
+        if(!$is_deleted && in_array($administration_option, $restore_options)) {abort(412);} // 属于恢复操作但数据并未被删除时
         return $item;
     }
 
-    protected function manageItem($item)
+    protected function manageItem($item, $type = null, $option = null)
     {
-        switch (Request('administratable_type')) {
+        $administratable_type = $type ? $type : Request('administratable_type');
+        switch ($administratable_type) {
             case 'user':
-                $this->userManagement($item);
+                $this->userManagement($item, $option);
                 break;
             case 'thread':
-                $this->threadManagement($item);
+                $this->threadManagement($item, $option);
                 break;
             case 'post':
-                $this->postManagement($item);
+                $this->postManagement($item, $option);
                 break;
             case 'status':
-                $this->statusManagement($item);
+                $this->statusManagement($item, $option);
                 break;
             case 'quote':
-                $this->quoteManagement($item);
+                $this->quoteManagement($item, $option);
                 break;
         }
     }
 
-    protected function userManagement($user) //禁言、解禁、禁止登录、解禁登录
+    protected function userManagement($user, $option = null) //禁言、解禁、禁止登录、解禁登录
     {
-        $administration_option = Request('administration_option');
+        $administration_option = $option ? $option : Request('administration_option');
         switch ($administration_option) {
             case 16:
             case 18:
@@ -80,9 +82,10 @@ trait ManageTrait
         }
     }
 
-    protected function threadManagement($thread) // 删除、修改channel、匿名、非匿名、锁帖、解锁、边缘、非边缘
+    protected function threadManagement($thread, $option = null) // 删除、修改channel、匿名、非匿名、锁帖、解锁、边缘、非边缘
     {
-        switch (Request('administration_option')) {
+        $administration_option = $option ? $option : Request('administration_option');
+        switch ($administration_option) {
             case 1:
                 $this->changeAttribute($thread, 0, 'is_locked', 'threads'); // 若要执行操作则帖子的is_locked应为0
                 break;
@@ -121,9 +124,10 @@ trait ManageTrait
         }
     }
 
-    protected function postManagement($post) // 删除、匿名、非匿名、折叠、非折叠、边缘、非边缘
+    protected function postManagement($post, $option = null) // 删除、匿名、非匿名、折叠、非折叠、边缘、非边缘
     {
-        switch (Request('administration_option')) {
+        $administration_option = $option ? $option : Request('administration_option');
+        switch ($administration_option) {
             case 7:
                 $post->delete();
                 break;
@@ -153,9 +157,10 @@ trait ManageTrait
         }
     }
 
-    protected function quoteManagement($quote)
+    protected function quoteManagement($quote, $option = null)
     {
-        switch (Request('administration_option')) {
+        $administration_option = $option ? $option : Request('administration_option');
+        switch ($administration_option) {
             case 12:
                 $this->anonymous($quote);
                 break;
@@ -167,9 +172,10 @@ trait ManageTrait
         }
     }
 
-    protected function statusManagement($status)
+    protected function statusManagement($status, $option = null)
     {
-        switch (Request('administration_option')) {
+        $administration_option = $option ? $option : Request('administration_option');
+        switch ($administration_option) {
             case 20:
                 $status->delete();
                 break;

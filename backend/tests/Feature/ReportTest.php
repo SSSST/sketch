@@ -158,7 +158,7 @@ class ReportTest extends TestCase
         $body = 'review body';
         $review_result = 'approved';
         $reason = 'review reason';
-        $administration_option = [1];
+        $administration_option = [1, 3];
 
         $response = $this->post('/api/report/'.$report->id.'/review', ['title' => $title, 'brief' => $brief, 'body' => $body, 'review_result' => $review_result, 'reason' => $reason, 'administration_option' => $administration_option])
         ->assertStatus(200)
@@ -197,7 +197,8 @@ class ReportTest extends TestCase
             ],
         ]);
 
-        //$this->assertEquals(1, $thread->fresh()->is_locked);
+        $this->assertEquals(1, $thread->fresh()->is_locked);
+        $this->assertEquals(0, $thread->fresh()->is_public);
     }
 
     /** @test */

@@ -46,6 +46,12 @@ class StoreReport extends FormRequest
             'report_kind' => 'string',
             'report_posts' => 'array',
             'review_result' => 'string',
+            'administration_option' => 'array',
+            'option_attribute' => 'numeric',
+            'channel_id' => 'numeric',
+            'majia' => 'string',
+            'reason' => 'string',
+            'is_public' => 'boolean',
         ];
     }
 
@@ -56,12 +62,16 @@ class StoreReport extends FormRequest
         $report_data['reporter_id'] = auth('api')->id();
         $post_data = $this->generatePostData();
 
-        $report = DB::transaction(function() use($report_data, $post_data) {
-            $post = Post::create($post_data);
-            $report_data['post_id'] = $post->id;
-            $report = Report::create($report_data);
-            return $report;
-        });
+        if (!$this->isDuplicateReport($report_data)) {
+            $report = DB::transaction(function() use($report_data, $post_data) {
+                $post = Post::create($post_data);
+                $report_data['post_id'] = $post->id;
+                $report = Report::create($report_data);
+                return $report;
+            });
+        } else {
+            abort(409);
+        }
 
         return $report;
     }
@@ -72,15 +82,19 @@ class StoreReport extends FormRequest
         $review_result = Request('review_result');
         $review_post_data = $this->generatePostData('reportRev', $post);
 
-        DB::transaction(function() use($report, $review_post_data, $review_result) {
-            $post = POST::create($review_post_data);
-            $report->update([
-                'review_result' => $review_result,
-                'updated_at' => Carbon::now(),
-            ]);
+        if (!$this->isDuplicateReview($report, $review_post_data)) {
+            DB::transaction(function() use($report, $review_post_data, $review_result) {
+                $post = POST::create($review_post_data);
+                $report->update([
+                    'review_result' => $review_result,
+                    'updated_at' => Carbon::now(),
+                ]);
 
-            if(!strcmp($review_result, 'approved'))  {$this->manage($report);} // 如果审核通过则创建记录并执行操作
-        });
+                if(!strcmp($review_result, 'approved'))  {$this->manage($report);} // 如果审核通过则创建记录并执行操作
+            });
+        } else {
+            abort(409);
+        }
 
         return $report;
     }
@@ -94,7 +108,7 @@ class StoreReport extends FormRequest
             $administration_data['administration_option'] = $option;
             $administration_data = $this->checkData($administration_data, $item);
             $administration = Administration::create($administration_data);
-            $this->manageItem($item, $administration_data['administratable_type']);
+            $this->manageItem($item, $administration_data['administratable_type'], $option);
         }
     }
 
@@ -142,5 +156,29 @@ class StoreReport extends FormRequest
             ->where('is_valid', 1)
             ->first();
         return $thread->report_thread_id;
+    }
+
+    private function isDuplicateReport($report_data)
+    {
+        $last_report = Report::where([
+            'reportable_type' => $report_data['reportable_type'],
+            'reportable_id' => $report_data['reportable_id'],
+            'report_kind' => $report_data['report_kind'],
+        ])->orderBy('created_at', 'desc')
+        ->first();
+
+        return !empty($last_report);
+    }
+
+    private function isDuplicateReview($report, $post_data)
+    {
+        $last_post = Post::where([
+            'user_id' => auth('api')->id(),
+            'type' => 'reportRev',
+        ])->orderBy('created_at', 'desc')
+        ->first();
+
+        return (strcmp($report->review_result, Request('review_result')) === 0)
+        && (strcmp($last_post->body, $post_data['body']) === 0);
     }
 }
